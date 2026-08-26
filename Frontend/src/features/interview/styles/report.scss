@@ -1,0 +1,569 @@
+// ---- Palette (kept consistent with the dashboard's home.scss) ----
+$bg-mint: #e9f7f2;
+$bg-white: #f6faf9;
+$blob-teal: #b7ebd9;
+$blob-blue: #c9e9f2;
+
+$text-dark: #23384a;
+$placeholder: #8a9cab;
+
+$panel-bg: rgba(255, 255, 255, 0.55);
+$panel-border: rgba(255, 255, 255, 0.7);
+$inner-bg: rgba(255, 255, 255, 0.4);
+$divider: rgba(35, 56, 74, 0.12);
+
+$accent-teal: #2f7d76;
+$accent-navy: #1d3a56;
+$accent-mint: #5fc9ab;
+$btn-gradient: linear-gradient(135deg, $accent-teal 0%, $accent-navy 100%);
+
+@mixin no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// ---- Page ------------------------------------------------------
+.report {
+  position: relative;
+  height: 100vh; // fixed to the viewport rather than min-height, so content can never push it taller
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(180deg, $bg-mint 0%, $bg-white 55%, $bg-mint 100%);
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  &::before {
+    width: 460px;
+    height: 460px;
+    top: -140px;
+    left: -140px;
+    background: $blob-teal;
+    opacity: 0.5;
+  }
+
+  &::after {
+    width: 500px;
+    height: 500px;
+    bottom: -180px;
+    right: -160px;
+    background: $blob-blue;
+    opacity: 0.45;
+  }
+
+  // below this width the 3-column layout stacks, so let the page scroll
+  // normally instead of forcing every stacked section into shared space
+  @media (max-width: 1024px) {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+}
+
+.page-title {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  font-size: clamp(24px, 3vw, 38px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: $text-dark;
+  margin: 0 0 28px;
+  text-align: center;
+}
+
+// header row shared by every panel, matching the dashboard's inputs
+.panel-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 19px;
+  font-weight: 700;
+  color: $text-dark;
+  margin-bottom: 18px;
+
+  svg {
+    width: 19px;
+    height: 19px;
+    color: $accent-teal;
+    opacity: 0.85;
+    flex-shrink: 0;
+  }
+}
+
+// ---- Layout ------------------------------------------------------
+.report-grid {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1320px;
+  flex: 1; // fills whatever height is left below the title
+  min-height: 0; // required so children can scroll instead of overflowing the page
+  display: grid;
+  grid-template-columns: 220px 1fr 300px;
+  grid-template-rows: minmax(0, 1fr); // forces the row to actually fill that height
+  gap: 40px;
+
+  @media (max-width: 1024px) {
+    flex: none;
+    min-height: auto;
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+  }
+}
+
+// shared by every panel: fills the grid row height and clips at the edge,
+// while its `.panel-scroll` child does the actual (hidden-scrollbar) scrolling
+%panel-column {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  @media (max-width: 1024px) {
+    height: auto;
+    overflow: visible;
+  }
+}
+
+.categories-panel,
+.questions-panel,
+.insights-panel {
+  @extend %panel-column;
+}
+
+// the scrollable inner region shared across all three panels
+.panel-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  @include no-scrollbar;
+
+  @media (max-width: 1024px) {
+    overflow-y: visible;
+  }
+}
+
+.categories-panel {
+  padding-right: 40px;
+  border-right: 1px solid $divider;
+
+  @media (max-width: 1024px) {
+    border-right: none;
+    padding-right: 0;
+  }
+}
+
+.insights-panel {
+  padding-left: 40px;
+  border-left: 1px solid $divider;
+  margin-left: -40px; // pulls the border flush against the grid gap instead of doubling it
+
+  @media (max-width: 1024px) {
+    border-left: none;
+    margin-left: 0;
+    padding-left: 0;
+  }
+}
+
+// ---- Category nav -----------------------------------------------
+.category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.category-item {
+  position: relative;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 10px 4px 10px 14px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  color: $text-dark;
+  opacity: 0.65;
+  cursor: pointer;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0;
+    border-radius: 2px;
+    background: $accent-teal;
+    transition: height 0.2s ease;
+  }
+
+  &:hover {
+    opacity: 0.9;
+    background: rgba(255, 255, 255, 0.4);
+  }
+
+  &.active {
+    opacity: 1;
+    font-weight: 700;
+    color: $accent-navy;
+    background: rgba(255, 255, 255, 0.55);
+
+    &::before {
+      height: 60%;
+    }
+  }
+}
+
+// ---- Question cards ------------------------------------------------
+.question-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.question-card {
+  background: $panel-bg;
+  border: 1px solid $panel-border;
+  border-radius: 18px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 16px 32px -20px rgba(29, 58, 86, 0.22);
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+
+  &.open {
+    box-shadow: 0 20px 40px -18px rgba(29, 58, 86, 0.28);
+  }
+}
+
+.question-header {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 20px 22px;
+  text-align: left;
+  font-family: inherit;
+
+  &:hover .question-text {
+    color: $accent-navy;
+  }
+}
+
+.question-text {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: $text-dark;
+  transition: color 0.15s ease;
+}
+
+.question-index {
+  color: $accent-teal;
+}
+
+.chevron {
+  flex-shrink: 0;
+  display: flex;
+  margin-top: 2px;
+  color: $placeholder;
+  transition: transform 0.25s ease;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.question-card.open .chevron {
+  transform: rotate(180deg);
+  color: $accent-teal;
+}
+
+// the smooth-height accordion: animating a grid row is cheaper and
+// smoother than measuring scrollHeight in JS
+.question-collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
+}
+
+.question-card.open .question-collapse {
+  grid-template-rows: 1fr;
+}
+
+.question-collapse-inner {
+  overflow: hidden;
+  padding: 0 22px;
+
+  p {
+    margin: 0 0 12px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: $text-dark;
+
+    &:last-child {
+      margin-bottom: 22px;
+    }
+
+    strong {
+      font-weight: 700;
+    }
+  }
+}
+
+// ---- Skills gaps ----------------------------------------------------
+.skills-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+  margin-bottom: 36px;
+}
+
+.skill-pill {
+  padding: 9px 20px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(47, 125, 118, 0.35);
+  background: rgba(255, 255, 255, 0.45);
+  color: $text-dark;
+  font-size: 14px;
+  font-weight: 600;
+  transition: transform 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.7);
+    transform: translateY(-1px);
+  }
+}
+
+.match-header {
+  margin-top: 8px;
+}
+
+// ---- Gauge -----------------------------------------------------------
+.gauge {
+  position: relative;
+  width: 100%;
+  max-width: 260px;
+  margin: 0 auto;
+}
+
+.gauge-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.gauge-track {
+  fill: none;
+  stroke: rgba(35, 56, 74, 0.1);
+  stroke-width: 14;
+  stroke-linecap: round;
+}
+
+.gauge-fill {
+  fill: none;
+  stroke: url(#gaugeGradient);
+  stroke-width: 14;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.7s ease;
+}
+
+.gauge-readout {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  text-align: center;
+}
+
+.gauge-score {
+  margin: 0;
+  font-size: 38px;
+  font-weight: 800;
+  color: $text-dark;
+  line-height: 1;
+
+  span {
+    font-size: 16px;
+    font-weight: 500;
+    color: $placeholder;
+    margin-left: 2px;
+  }
+}
+
+.gauge-caption {
+  margin: 6px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: $placeholder;
+}
+
+// ---- Preparation Plan: day-wise roadmap -----------------------------
+.roadmap {
+  display: flex;
+  flex-direction: column;
+}
+
+.roadmap-item {
+  position: relative;
+  display: flex;
+  gap: 18px;
+  padding-bottom: 30px;
+
+  &:last-child {
+    padding-bottom: 4px;
+  }
+}
+
+.roadmap-marker {
+  position: relative;
+  flex-shrink: 0;
+  width: 36px;
+  display: flex;
+  justify-content: center;
+
+  // the connecting line between one day's badge and the next
+  &::after {
+    content: '';
+    position: absolute;
+    top: 36px;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    background: rgba(47, 125, 118, 0.25);
+  }
+}
+
+.roadmap-item:last-child .roadmap-marker::after {
+  display: none;
+}
+
+.roadmap-day-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: $btn-gradient;
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 8px 16px -6px rgba(29, 58, 86, 0.45);
+}
+
+.roadmap-content {
+  flex: 1;
+  min-width: 0;
+  padding-top: 4px;
+}
+
+.roadmap-day-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 700;
+  color: $text-dark;
+
+  span {
+    color: $placeholder;
+    margin: 0 6px;
+    font-weight: 400;
+  }
+}
+
+.roadmap-tasks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.task-item {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  text-align: left;
+  border: 1px solid $panel-border;
+  background: $inner-bg;
+  border-radius: 12px;
+  padding: 11px 14px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease, transform 0.1s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.65);
+  }
+
+  &:active {
+    transform: scale(0.99);
+  }
+}
+
+.task-checkbox {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  border-radius: 6px;
+  border: 1.5px solid rgba(47, 125, 118, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, border-color 0.15s ease;
+
+  svg {
+    width: 11px;
+    height: 11px;
+    color: #fff;
+  }
+}
+
+.task-item.checked .task-checkbox {
+  background: $btn-gradient;
+  border-color: transparent;
+}
+
+.task-text {
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: $text-dark;
+  transition: opacity 0.15s ease;
+}
+
+.task-item.checked .task-text {
+  opacity: 0.55;
+  text-decoration: line-through;
+}
