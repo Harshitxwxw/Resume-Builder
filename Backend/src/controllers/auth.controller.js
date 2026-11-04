@@ -3,19 +3,23 @@ const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 const tokenBlacklistModel = require("../models/blacklist.model")
 
+const COOKIE_OPTIONS = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
+}
 
 /**
  * @name registerUser
  * @description Register a new user , expects username , email & password in req.body
  * @access Public
  */
-
-
 async function registerUser(req , res) {
     const {username , email , password } = req.body;
 
     if(!username || !email || !password){
-        return res.status(400).jsom({
+        return res.status(400).json({
             message : "Provide username , email & password"
         })
     }
@@ -44,7 +48,7 @@ async function registerUser(req , res) {
         {expiresIn : "1d"}
     )
 
-    res.cookie("token" , token )
+    res.cookie("token" , token, COOKIE_OPTIONS)
 
     res.status(201).json({
         message : "User registered successfully",
@@ -86,7 +90,7 @@ async function loginUser(req , res) {
         {expiresIn : "1d"}  
     )
 
-    res.cookie("token" , token)
+    res.cookie("token" , token, COOKIE_OPTIONS)
 
     res.status(200).json({
         message : "User logged in successfully",
@@ -99,13 +103,11 @@ async function loginUser(req , res) {
     )
 }
 
-
 /**
  * @name logoutUser
  * @description Logout a user , expects token in req.cookies
  * @access Public
  */
-
 async function logoutUser(req , res) {
     const token = req.cookies.token
 
@@ -113,7 +115,10 @@ async function logoutUser(req , res) {
         await tokenBlacklistModel.create({token})
     }
 
-    res.clearCookie("token")
+    res.clearCookie("token", {
+        httpOnly: true,
+        sameSite: "lax"
+    })
 
     res.status(200).json({
         message : "User logged out successfully"
@@ -126,16 +131,27 @@ async function logoutUser(req , res) {
  * @access Private
  */
 async function getMeController(req, res) {
-    const user = await userModel.findById(req.user.id)
-
-    res.status(200).json({
-        message: "User fetched successfully",
-        user:{
-            id: user._id,
-            username: user.username,
-            email: user.email
+    try {
+        const user = await userModel.findById(req.user.id)
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            })
         }
-    })
+
+        res.status(200).json({
+            message: "User fetched successfully",
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email
+            }
+        })
+    } catch (error) {
+        res.status(500).json({
+            message: "Failed to fetch user profile"
+        })
+    }
 }
 
 module.exports = {registerUser, loginUser, logoutUser, getMeController}
