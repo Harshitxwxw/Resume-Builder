@@ -7,20 +7,40 @@ const cookieParser = require('cookie-parser')
 // require all routes 
 const authRouter = require('./routes/auth.routes')
 const interviewRouter = require('./routes/interview.routes')
+const atsRouter = require('./routes/ats.routes')
+const mockInterviewRouter = require('./routes/mockInterview.routes')
+const resumeRouter = require('./routes/resume.routes')
+const creditRouter = require('./routes/credit.routes')
+const planTrackerRouter = require('./routes/planTracker.routes')
+const profileRouter = require('./routes/profile.routes')
+const wishlistRouter = require('./routes/wishlist.routes')
 
-
+// Trust reverse proxy for secure cookies on Render/Heroku/Vercel
+app.set("trust proxy", 1)
 
 // middleware 
 app.use(cookieParser())
 app.use(express.json())
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: function (origin, callback) {
+        // Allow requests with no origin (e.g. mobile apps, curl, Postman)
+        if (!origin) return callback(null, true);
+        // Allow all origins by reflecting the request origin so credentials work seamlessly
+        return callback(null, true);
+    },
     credentials: true
 }))
 
 /// use routes
 app.use("/api/auth" , authRouter)
 app.use("/api/interview" , interviewRouter)
+app.use("/api/ats", atsRouter)
+app.use("/api/mock-interview", mockInterviewRouter)
+app.use("/api/resumes", resumeRouter)
+app.use("/api/credits", creditRouter)
+app.use("/api/plan-tracker", planTrackerRouter)
+app.use("/api/profile", profileRouter)
+app.use("/api/wishlist", wishlistRouter)
 
 
 
