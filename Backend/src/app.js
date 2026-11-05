@@ -18,6 +18,16 @@ const wishlistRouter = require('./routes/wishlist.routes')
 // Trust reverse proxy for secure cookies on Render/Heroku/Vercel
 app.set("trust proxy", 1)
 
+// Allowed origins including deployed frontend
+const allowedOrigins = [
+    "https://career-ai-7i4h.onrender.com",
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:3000",
+    process.env.CLIENT_URL,
+    process.env.FRONTEND_URL
+].filter(Boolean)
+
 // middleware 
 app.use(cookieParser())
 app.use(express.json())
@@ -25,7 +35,12 @@ app.use(cors({
     origin: function (origin, callback) {
         // Allow requests with no origin (e.g. mobile apps, curl, Postman)
         if (!origin) return callback(null, true);
-        // Allow all origins by reflecting the request origin so credentials work seamlessly
+        if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== "production") {
+            return callback(null, true);
+        }
+        if (/https:\/\/.*\.onrender\.com$/.test(origin)) {
+            return callback(null, true);
+        }
         return callback(null, true);
     },
     credentials: true
