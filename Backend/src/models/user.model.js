@@ -18,6 +18,11 @@ const userSchema = new mongoose.Schema({
     password : {
         type : String,
         required : true
+    },
+    credits : {
+        type : Number,
+        default : 100,
+        min : 0
     }
 })
 

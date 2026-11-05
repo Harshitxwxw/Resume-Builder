@@ -124,6 +124,10 @@ const interviewReportSchema = new mongoose.Schema({
     title : {
         type : String,
         required : [true , "Job title is required"]
+    },
+    isTracked : {
+        type : Boolean,
+        default : false
     }
 },{
     timestamps : true
