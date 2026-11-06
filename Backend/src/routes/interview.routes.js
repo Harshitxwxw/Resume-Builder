@@ -24,13 +24,18 @@ interviewRouter.get("/report/:interviewId" , authMiddleware.authUser , interview
 
 
 /**
- * @routes GET  /api/interview/interviewId
+ * @routes GET  /api/interview/reports
  * @description get all interivew report by interviewId
  * @access Private
  */
 
 interviewRouter.get("/reports" , authMiddleware.authUser , interviewController.getAll_InterviewReports)
 
-
+/**
+ * @routes PATCH /api/interview/report/:interviewId/track
+ * @description toggle tracking for an interview preparation plan
+ * @access Private
+ */
+interviewRouter.patch("/report/:interviewId/track", authMiddleware.authUser, interviewController.toggleTrackReportController)
 
 module.exports = interviewRouter;
