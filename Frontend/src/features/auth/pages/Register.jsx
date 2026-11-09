@@ -1,73 +1,116 @@
-import React from 'react'
-import {useNavigate, Link} from "react-router-dom"
-import { useState } from 'react'
+import React, { useState } from 'react'
+import { useNavigate, Link, Navigate } from "react-router-dom"
 import { useAuth } from "../hooks/useAuth"
 
 const Register = () => {
-    const {loading, handleRegister} = useAuth();
+    const { user, loading, handleRegister } = useAuth();
     const navigate = useNavigate();
 
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-  
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        await handleRegister(username, email, password);
-        navigate("/");
+    const [errorMsg, setErrorMsg] = useState("");
+    const [submitting, setSubmitting] = useState(false);
+
+    // If already authenticated, redirect to dashboard
+    if (!loading && user) {
+        return <Navigate to="/" replace />;
     }
 
-    if(loading) {
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setErrorMsg("");
+        setSubmitting(true);
+        try {
+            await handleRegister(username, email, password);
+            navigate("/", { replace: true });
+        } catch (err) {
+            setErrorMsg(err.response?.data?.message || "Registration failed");
+        } finally {
+            setSubmitting(false);
+        }
+    }
+
+    if (loading && !user) {
         return (
-            <main>
+            <main className="auth-page">
                 <h1>Loading....</h1>
             </main>
         )
     }
-    
-  return (
-        <main>
-        <div className="form_container">
-            <h1>Register</h1>
 
-            <form >
-                <div className="input_group">
-                    <label htmlFor="username">Username</label>
-                    <input 
-                        type="username" id="username" name="username" placeholder='Enter username' 
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                    />
-                </div>
+    return (
+        <main className="auth-page">
+            <div className="form_container">
+                <h1>Register</h1>
 
-                <div className="input_group">
-                    <label htmlFor="email">Email</label>
-                    <input 
-                        type="email" id="email" name="email" placeholder='Enter Email Address' 
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                </div>
+                {errorMsg && (
+                    <div style={{
+                        color: '#ef4444',
+                        backgroundColor: '#fee2e2',
+                        padding: '10px 14px',
+                        borderRadius: '8px',
+                        fontSize: '13.5px',
+                        marginBottom: '16px',
+                        fontWeight: 500
+                    }}>
+                        {errorMsg}
+                    </div>
+                )}
 
-                <div className="input_group">
-                    <label htmlFor="password">Password</label>
-                    <input 
-                        type="password" id="password" name="password" placeholder='Enter password' 
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                </div>
+                <form onSubmit={handleSubmit}>
+                    <div className="input_group">
+                        <label htmlFor="username">Username</label>
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            placeholder="Enter username"
+                            value={username}
+                            required
+                            onChange={(e) => setUsername(e.target.value)}
+                        />
+                    </div>
 
-                <button className="button primary_btn"
-                    onClick={handleSubmit}
-                > Register </button>
+                    <div className="input_group">
+                        <label htmlFor="email">Email</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="Enter Email Address"
+                            value={email}
+                            required
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                    </div>
 
-                <p>Already have account? <Link to={"/login"}>Login</Link></p>
+                    <div className="input_group">
+                        <label htmlFor="password">Password</label>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter password"
+                            value={password}
+                            required
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                    </div>
 
-            </form>
-        </div>
-    </main>
-  )
+                    <button
+                        type="submit"
+                        className="button primary_btn"
+                        disabled={submitting}
+                    >
+                        {submitting ? 'Registering...' : 'Register'}
+                    </button>
+
+                    <p>Already have account? <Link to={"/login"}>Login</Link></p>
+                </form>
+            </div>
+        </main>
+    )
 }
 
 export default Register

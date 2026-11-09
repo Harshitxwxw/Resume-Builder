@@ -1,19 +1,18 @@
-// ---- Palette -------------------------------------------------
-$bg-mint: #e9f7f2;
-$bg-white: #f6faf9;
-$blob-teal: #b7ebd9;
-$blob-blue: #c9e9f2;
+// ---- Palette (Unified SaaS Blue & Slate Theme) -------------------
+$page-bg: #f8fafc;
+$text-dark: #0f172a;
+$text-body: #334155;
+$placeholder: #94a3b8;
 
-$text-dark: #23384a;
-$placeholder: #8a9cab;
+$panel-bg: #ffffff;
+$panel-border: #e2e8f0;
+$inner-bg: #f8fafc;
+$inner-border: #e2e8f0;
 
-$panel-bg: rgba(255, 255, 255, 0.55);
-$panel-border: rgba(255, 255, 255, 0.7);
-$inner-bg: rgba(255, 255, 255, 0.35);
-
-$accent-teal: #2f7d76;
-$accent-navy: #1d3a56;
-$btn-gradient: linear-gradient(135deg, $accent-teal 0%, $accent-navy 100%);
+$primary-blue: #2563eb;
+$primary-hover: #1d4ed8;
+$navy-dark: #1e3a8a;
+$btn-gradient: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%);
 
 // hides a scrollbar while keeping the element scrollable
 @mixin no-scrollbar {
@@ -27,56 +26,33 @@ $btn-gradient: linear-gradient(135deg, $accent-teal 0%, $accent-navy 100%);
 // ---- Page ------------------------------------------------------
 .home {
   position: relative;
-  height: 100vh; // fixed to the viewport instead of min-height, so it can never grow past it
+  height: 100%; // fills the layout content column (which is already 100vh)
   width: 100%;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   box-sizing: border-box;
-  padding: 20px 20px 30px;
+  padding: 24px 20px 30px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: linear-gradient(180deg, $bg-mint 0%, $bg-white 60%, $bg-mint 100%);
+  background: $page-bg;
 
-  // soft decorative color blobs, like the reference image
   &::before,
   &::after {
-    content: '';
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(70px);
-    z-index: 0;
-    pointer-events: none;
+    display: none;
   }
 
-  &::before {
-    width: 420px;
-    height: 420px;
-    top: -120px;
-    left: -120px;
-    background: $blob-teal;
-    opacity: 0.55;
+  .page-title {
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+    font-size: clamp(24px, 2.8vw, 36px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: $text-dark;
+    margin: 0 0 20px;
+    text-align: center;
   }
-
-  &::after {
-    width: 460px;
-    height: 460px;
-    bottom: -160px;
-    right: -140px;
-    background: $blob-blue;
-    opacity: 0.5;
-  }
-}
-
-.page-title {
-  position: relative;
-  z-index: 1;
-  flex-shrink: 0; // keep its natural size, never get squeezed by the flex layout
-  font-size: clamp(26px, 3.2vw, 42px);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: $text-dark;
-  margin: 0 0 20px;
-  text-align: center;
 }
 
 // ---- Layout ------------------------------------------------------
@@ -91,56 +67,70 @@ $btn-gradient: linear-gradient(135deg, $accent-teal 0%, $accent-navy 100%);
   gap: 20px;
   margin-bottom: 20px;
   flex: 1; // takes all the leftover vertical space between the title and the button
-  min-height: 0; // required so children can shrink/scroll instead of overflowing
+  min-height: 560px;
 
   @media (max-width: 860px) {
     grid-template-columns: 1fr;
     grid-template-rows: none;
+    min-height: 0;
   }
 }
 
 // shared "card" look for the two top-level columns
 %panel {
-  background: $panel-bg;
-  border: 1px solid $panel-border;
-  border-radius: 20px;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 20px 40px -20px rgba(29, 58, 86, 0.25);
-  padding: 28px;
+  background: var(--bg-card, $panel-bg);
+  border: 1px solid var(--border-card, $panel-border);
+  border-radius: 18px;
+  box-shadow: 0 4px 16px -4px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03);
+  padding: 24px 26px;
   box-sizing: border-box;
 }
 
 .left {
   @extend %panel;
   height: 100%;
-  min-height: 0;
-  overflow: hidden; // clip instead of pushing the layout taller when text is long
+  min-height: 560px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
+
+  @media (max-width: 860px) {
+    min-height: 340px;
+  }
 }
 
 .right {
   height: 100%;
-  min-height: 0;
+  min-height: 560px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
+
+  @media (max-width: 860px) {
+    min-height: 0;
+  }
 
   .input_group {
     @extend %panel;
     display: flex;
     flex-direction: column;
-    flex-shrink: 0; // "Upload Resume" block keeps its natural, content-driven height
+    flex-shrink: 0;
 
     &:first-child {
-      padding-bottom: 24px;
+      padding: 18px 20px 16px;
     }
 
-    // "Self Description" block soaks up whatever height is left
     &:last-child {
       flex: 1;
-      min-height: 0;
+      min-height: 230px;
+      padding: 18px 20px 20px;
+      display: flex;
+      flex-direction: column;
+
+      .textarea-wrap {
+        flex: 1;
+        min-height: 150px;
+      }
     }
   }
 }
@@ -151,16 +141,21 @@ $btn-gradient: linear-gradient(135deg, $accent-teal 0%, $accent-navy 100%);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
-  color: $text-dark;
-  margin-bottom: 16px;
+  color: var(--text-primary, $text-dark);
+  margin-bottom: 14px;
+
+  span {
+    color: var(--text-primary, $text-dark);
+    font-weight: 700;
+  }
 
   svg {
-    width: 22px;
-    height: 22px;
-    color: $text-dark;
-    opacity: 0.75;
+    width: 20px;
+    height: 20px;
+    color: var(--accent-blue, $primary-blue);
+    opacity: 0.9;
     flex-shrink: 0;
   }
 }
@@ -170,50 +165,66 @@ $btn-gradient: linear-gradient(135deg, $accent-teal 0%, $accent-navy 100%);
   position: relative;
   flex: 1;
   min-height: 0;
-  overflow: hidden; // same containment as the self-description panel
+  overflow: hidden;
   display: flex;
+  border: 1px solid var(--border-card, $inner-border);
+  border-radius: 14px;
+  background: var(--bg-input, $inner-bg);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+
+  &:focus-within {
+    border-color: var(--border-focus, $primary-blue);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+  }
 
   textarea {
     width: 100%;
     height: 100%;
-    resize: none; // no manual drag-to-resize handle
-    border: none;
-    outline: none;
-    border-radius: 16px;
-    background: $inner-bg;
-    padding: 16px 44px 16px 16px;
-    font-size: 15px;
+    resize: none;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    border-radius: 14px;
+    background: transparent !important;
+    padding: 14px 44px 14px 16px;
+    font-size: 14.5px;
     font-family: inherit;
-    color: $text-dark;
-    line-height: 1.5;
+    color: var(--text-primary, $text-dark);
+    line-height: 1.55;
     box-sizing: border-box;
-    overflow-y: auto; // still scrolls internally on long text
-    overflow-wrap: break-word; // long unbroken words/URLs wrap instead of overflowing sideways
+    overflow-y: auto;
+    overflow-wrap: break-word;
     word-break: break-word;
     @include no-scrollbar;
 
+    &:focus {
+      border: none !important;
+      outline: none !important;
+      box-shadow: none !important;
+      background: transparent !important;
+    }
+
     &::placeholder {
-      color: $placeholder;
+      color: var(--text-light, $placeholder);
     }
   }
 }
 
 .icon-btn {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 30px;
-  height: 30px;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: $text-dark;
-  opacity: 0.6;
+  color: var(--text-muted, $placeholder);
   cursor: pointer;
-  transition: opacity 0.15s ease, background 0.15s ease;
+  transition: all 0.15s ease;
 
   svg {
     width: 16px;
@@ -221,21 +232,132 @@ $btn-gradient: linear-gradient(135deg, $accent-teal 0%, $accent-navy 100%);
   }
 
   &:hover {
-    opacity: 1;
-    background: rgba(255, 255, 255, 0.6);
+    color: var(--accent-blue, $primary-blue);
+    background: var(--bg-card-elevated, #eff6ff);
   }
 }
 
-.textarea-placeholder-icon {
-  position: absolute;
-  top: 17px;
-  left: 16px;
-  color: $placeholder;
-  pointer-events: none;
+// Saved Resume Dropdown Selector & Selected Resume Card
+.setup-workspace-select-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+  margin-bottom: 0;
 
-  svg {
-    width: 15px;
-    height: 15px;
+  .resume-divider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 8px 0 6px;
+
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border-card, #e2e8f0);
+    }
+
+    .divider-text {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--text-muted, #64748b);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+  }
+
+  .ws-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted, #64748b);
+  }
+
+  .ws-select {
+    height: 38px;
+    font-size: 13.5px;
+    border: 1px solid var(--border-card, #cbd5e1);
+    border-radius: 9px;
+    padding: 0 12px;
+    background: var(--bg-input, #f8fafc);
+    color: var(--text-primary, #0f172a);
+    outline: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:focus {
+      border-color: var(--border-focus, #3b82f6);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+  }
+}
+
+.selected-resume-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--bg-input, #eff6ff);
+  border: 1.5px solid var(--border-focus, #bfdbfe);
+  border-radius: 12px;
+  transition: all 0.15s ease;
+
+  .selected-resume-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+
+    .resume-icon {
+      color: var(--accent-blue, #2563eb);
+      flex-shrink: 0;
+    }
+
+    .resume-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+
+      .resume-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-primary, #0f172a);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .resume-sub {
+        font-size: 12px;
+        color: var(--text-muted, #64748b);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+
+  .btn-remove-selected-resume {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1px solid var(--border-card, #cbd5e1);
+    background: var(--bg-card-elevated, #ffffff);
+    color: var(--text-secondary, #334155);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+
+    &:hover {
+      background: #f1f5f9;
+      color: var(--text-primary, #0f172a);
+    }
   }
 }
 
@@ -247,25 +369,27 @@ $btn-gradient: linear-gradient(135deg, $accent-teal 0%, $accent-navy 100%);
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  border: 1.5px dashed rgba(35, 56, 74, 0.25);
+  gap: 6px;
+  border: 1.5px dashed var(--border-card, #cbd5e1);
   border-radius: 14px;
-  background: $inner-bg;
-  padding: 32px 20px;
+  background: var(--bg-input, $inner-bg);
+  padding: 16px 14px;
   cursor: pointer;
   text-align: center;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 
   &:hover,
   &.dragging {
-    border-color: $accent-teal;
-    background: rgba(255, 255, 255, 0.55);
+    border-color: var(--border-focus, $primary-blue);
+    background: var(--bg-card-active, #eff6ff);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.08);
   }
 
   svg {
-    width: 34px;
-    height: 34px;
-    color: $placeholder;
+    width: 28px;
+    height: 28px;
+    color: var(--accent-blue, $primary-blue);
+    opacity: 0.85;
   }
 
   input[type='file'] {
@@ -275,23 +399,66 @@ $btn-gradient: linear-gradient(135deg, $accent-teal 0%, $accent-navy 100%);
 
 .dropzone-label {
   margin: 0;
-  color: $text-dark;
-  font-size: 15px;
+  color: var(--text-primary, $text-dark);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .choose-file-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
 }
 
 .file-status {
-  font-size: 14px;
+  font-size: 13.5px;
   color: $placeholder;
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &.has-file {
+    color: $primary-blue;
+    font-weight: 600;
+  }
 }
 
-// ---- Buttons -----------------------------------------------------
+.btn-remove-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #ef4444;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: #fee2e2;
+    border-color: #f87171;
+    color: #dc2626;
+  }
+}
+
+// ---- Buttons & Actions -------------------------------------------
+.home-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-shrink: 0;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -304,17 +471,17 @@ $btn-gradient: linear-gradient(135deg, $accent-teal 0%, $accent-navy 100%);
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
-  box-shadow: 0 10px 24px -10px rgba(29, 58, 86, 0.5);
+  box-shadow: 0 10px 24px -10px rgba(37, 99, 235, 0.45);
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 14px 28px -10px rgba(29, 58, 86, 0.55);
+    box-shadow: 0 14px 28px -10px rgba(37, 99, 235, 0.55);
   }
 }
 
 .btn-small {
-  padding: 10px 20px;
-  font-size: 14px;
+  padding: 8px 18px;
+  font-size: 13.5px;
   border-radius: 8px;
   align-items: center;
 
@@ -326,12 +493,61 @@ $btn-gradient: linear-gradient(135deg, $accent-teal 0%, $accent-navy 100%);
 .generate-btn {
   position: relative;
   z-index: 1;
-  flex-shrink: 0; // stays pinned at its natural size at the bottom, never squeezed
-  padding: 18px 40px;
-  font-size: 17px;
+  flex-shrink: 0;
+  padding: 16px 38px;
+  font-size: 16px;
   border-radius: 10px;
 
   &:active {
     transform: scale(0.95);
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+.btn-reset-draft {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 15px 22px;
+  font-size: 14.5px;
+  font-weight: 600;
+  border-radius: 10px;
+  border: 1px solid $panel-border;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: #fef2f2;
+    border-color: #fca5a5;
+    color: #ef4444;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
