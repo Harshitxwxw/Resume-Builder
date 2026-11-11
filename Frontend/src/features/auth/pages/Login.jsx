@@ -3,6 +3,7 @@ import '../auth.form.scss'
 import { useNavigate, Link, Navigate } from "react-router-dom"
 import { useAuth } from "../hooks/useAuth"
 import { useTheme } from "../../../context/ThemeContext"
+import CareerAILogo from "../../../components/CareerAILogo"
 import {
   Mail,
   Lock,
@@ -86,8 +87,7 @@ const Login = () => {
         {/* Card Header */}
         <div className="auth-card-header">
           <Link to="/" className="brand-badge-link">
-            <span className="brand-icon">✦</span>
-            <span className="brand-name">CareerAI</span>
+            <CareerAILogo size={36} />
           </Link>
           <h1 className="auth-title">Welcome back</h1>
           <p className="auth-subtitle">

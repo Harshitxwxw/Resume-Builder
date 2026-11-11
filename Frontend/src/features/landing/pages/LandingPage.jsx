@@ -31,6 +31,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { useTheme } from '../../../context/ThemeContext'
+import CareerAILogo, { CareerAIIcon } from '../../../components/CareerAILogo'
 import '../styles/landing.scss'
 
 const TOOLS_LIST = [
@@ -190,8 +191,7 @@ const LandingPage = () => {
       <header className="landing-navbar">
         <div className="nav-container">
           <Link to="/" className="nav-brand">
-            <span className="brand-icon">✦</span>
-            <span className="brand-name">CareerAI</span>
+            <CareerAILogo size={32} />
           </Link>
 
           <nav className="nav-links">
@@ -244,7 +244,7 @@ const LandingPage = () => {
         <div className="hero-glow-sphere" />
         <div className="hero-container">
           <div className="hero-pill-badge">
-            <Sparkles size={14} className="sparkle-icon" />
+            <CareerAIIcon size={16} />
             <span>Next-Gen Career Intelligence Platform</span>
             <span className="pill-divider">·</span>
             <span className="free-credits-tag">100 Free Credits ⚡</span>
@@ -268,7 +268,7 @@ const LandingPage = () => {
               className="btn btn-hero-primary"
               onClick={() => handleCtaClick('/dashboard')}
             >
-              <span>{user ? 'Launch Your Dashboard' : 'Get Started — 100 Credits'}</span>
+              <span>{user ? 'Launch Dashboard' : 'Get Started — 100 Credits'}</span>
               <ArrowRight size={18} />
             </button>
 
@@ -942,7 +942,10 @@ const LandingPage = () => {
       <section className="landing-bottom-cta">
         <div className="section-container">
           <div className="bottom-cta-box">
-            <span className="bottom-eyebrow">✦ Start Accelerating Today</span>
+            <span className="bottom-eyebrow" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              <CareerAIIcon size={16} />
+              <span>Start Accelerating Today</span>
+            </span>
             <h2 className="bottom-title">
               Ready to Walk Into Your Next Interview With Complete Confidence?
             </h2>
@@ -957,7 +960,7 @@ const LandingPage = () => {
                 className="btn btn-hero-primary"
                 onClick={() => handleCtaClick('/dashboard')}
               >
-                <span>{user ? 'Go to Your Dashboard' : 'Create Account — 100 Credits'}</span>
+                <span>{user ? 'Go to Dashboard' : 'Create Account — 100 Credits'}</span>
                 <ArrowRight size={18} />
               </button>
 
@@ -976,8 +979,7 @@ const LandingPage = () => {
         <div className="footer-container">
           <div className="footer-brand-col">
             <div className="footer-logo">
-              <span className="brand-icon">✦</span>
-              <span className="brand-name">CareerAI</span>
+              <CareerAILogo size={28} />
             </div>
             <p className="footer-tagline">
               The complete AI-powered career intelligence platform for modern tech professionals.

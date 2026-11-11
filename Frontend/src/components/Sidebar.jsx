@@ -14,6 +14,7 @@ import {
   Bot
 } from 'lucide-react'
 import { useAuth } from '../features/auth/hooks/useAuth'
+import CareerAILogo from './CareerAILogo'
 import './sidebar.scss'
 
 const NAV_ITEMS = [
@@ -120,8 +121,7 @@ const Sidebar = () => {
           style={{ cursor: 'pointer' }}
           title="Go to Dashboard"
         >
-          <span className="sidebar__brand-icon">✦</span>
-          <span className="sidebar__brand-name">CareerAI</span>
+          <CareerAILogo size={38} textSize="25px" textColor="light" />
         </div>
 
         {/* ---- Navigation ---- */}

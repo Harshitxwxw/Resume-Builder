@@ -27,6 +27,7 @@
   --auth-glow-1: radial-gradient(circle, #2563eb 0%, rgba(37, 99, 235, 0.05) 70%, transparent 100%);
   --auth-glow-2: radial-gradient(circle, #7c3aed 0%, rgba(124, 58, 237, 0.05) 70%, transparent 100%);
   --auth-glow-opacity: 0.35;
+  --logo-text: var(--auth-text-head);
 
   // Light Mode Tokens (when user selected Light Theme)
   &.light,

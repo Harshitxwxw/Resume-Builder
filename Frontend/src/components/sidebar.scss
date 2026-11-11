@@ -33,9 +33,15 @@ $accent-red:     #f43f5e;
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 0 8px 22px;
+  padding: 0 6px 20px;
   border-bottom: 1px solid $divider;
-  margin-bottom: 22px;
+  margin-bottom: 20px;
+  min-height: 44px;
+  transition: opacity 0.15s ease;
+
+  &:hover {
+    opacity: 0.92;
+  }
 }
 
 .sidebar__brand-icon {

@@ -13,28 +13,28 @@ export const setupMockInterviewApi = async ({ role, experience, interviewType, r
   const res = await api.post('/setup', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   });
-  return res.data;
+  return res.data?.result || res.data;
 };
 
 export const evaluateAnswerApi = async ({ question, answer, role, interviewType }) => {
   const res = await api.post('/evaluate', { question, answer, role, interviewType });
-  return res.data;
+  return res.data?.result || res.data;
 };
 
 export const generateInterviewReportApi = async ({ sessionResults, role, interviewType }) => {
   const res = await api.post('/report', { sessionResults, role, interviewType });
-  return res.data;
+  return res.data?.result || res.data;
 };
 
 // Database persistence APIs
 export const fetchMockReports = async () => {
   const res = await api.get('/reports');
-  return res.data?.mockReports || [];
+  return res.data?.mockReports || res.data || [];
 };
 
 export const saveMockReportToDb = async (reportData) => {
   const res = await api.post('/reports', reportData);
-  return res.data?.report;
+  return res.data?.report || res.data;
 };
 
 export const deleteMockReportFromDb = async (id) => {
