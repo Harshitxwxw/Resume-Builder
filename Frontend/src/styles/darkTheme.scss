@@ -1605,9 +1605,74 @@
           }
         }
 
-        .btn-calc-main {
+        .btn-calc-main,
+        .btn-calculate-cta {
           background: #2563eb !important;
           color: #ffffff !important;
+
+          &.insufficient-btn {
+            background: linear-gradient(135deg, #d97706, #b45309) !important;
+          }
+
+          &:disabled,
+          &.disabled-btn {
+            background: #1e293b !important;
+            color: #64748b !important;
+            border-color: var(--border-card) !important;
+          }
+        }
+
+        .credits-insufficient-banner {
+          background: rgba(239, 68, 68, 0.15) !important;
+          border: 1px solid rgba(239, 68, 68, 0.35) !important;
+          color: #fca5a5 !important;
+
+          .banner-earn-link {
+            color: #93c5fd !important;
+          }
+        }
+      }
+    }
+
+    .credits-modal-card {
+      background: var(--bg-card) !important;
+      border: 1px solid var(--border-card) !important;
+      color: var(--text-primary) !important;
+
+      h3 {
+        color: var(--text-primary) !important;
+      }
+
+      .modal-lead {
+        color: var(--text-muted) !important;
+      }
+
+      .modal-ways-list {
+        background: var(--bg-card-elevated) !important;
+        border-color: var(--border-card) !important;
+
+        .ways-title {
+          color: var(--text-secondary) !important;
+        }
+
+        .way-item {
+          color: var(--text-primary) !important;
+
+          .way-badge {
+            background: rgba(16, 185, 129, 0.15) !important;
+            border-color: rgba(16, 185, 129, 0.35) !important;
+            color: #34d399 !important;
+          }
+        }
+      }
+
+      .modal-btn-row .btn-cancel {
+        background: var(--bg-card-elevated) !important;
+        border-color: var(--border-card) !important;
+        color: var(--text-secondary) !important;
+
+        &:hover {
+          background: #1f2d48 !important;
         }
       }
     }
@@ -1766,6 +1831,70 @@
         .btn-enhance-main {
           background: #2563eb !important;
           color: #ffffff !important;
+
+          &.insufficient-btn {
+            background: linear-gradient(135deg, #d97706, #b45309) !important;
+          }
+
+          &:disabled,
+          &.disabled-btn {
+            background: #1e293b !important;
+            color: #64748b !important;
+            border-color: var(--border-card) !important;
+          }
+        }
+
+        .credits-insufficient-banner {
+          background: rgba(239, 68, 68, 0.15) !important;
+          border: 1px solid rgba(239, 68, 68, 0.35) !important;
+          color: #fca5a5 !important;
+
+          .banner-earn-link {
+            color: #93c5fd !important;
+          }
+        }
+      }
+    }
+
+    .credits-modal-card {
+      background: var(--bg-card) !important;
+      border: 1px solid var(--border-card) !important;
+      color: var(--text-primary) !important;
+
+      h3 {
+        color: var(--text-primary) !important;
+      }
+
+      .modal-lead {
+        color: var(--text-muted) !important;
+      }
+
+      .modal-ways-list {
+        background: var(--bg-card-elevated) !important;
+        border-color: var(--border-card) !important;
+
+        .ways-title {
+          color: var(--text-secondary) !important;
+        }
+
+        .way-item {
+          color: var(--text-primary) !important;
+
+          .way-badge {
+            background: rgba(16, 185, 129, 0.15) !important;
+            border-color: rgba(16, 185, 129, 0.35) !important;
+            color: #34d399 !important;
+          }
+        }
+      }
+
+      .modal-btn-row .btn-cancel {
+        background: var(--bg-card-elevated) !important;
+        border-color: var(--border-card) !important;
+        color: var(--text-secondary) !important;
+
+        &:hover {
+          background: #1f2d48 !important;
         }
       }
     }

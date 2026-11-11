@@ -7,6 +7,8 @@ export const AWARDED_PLAN_DAYS_KEY = 'career_ai_awarded_prep_days';
 
 export const DEFAULT_INITIAL_CREDITS = 100;
 export const MOCK_INTERVIEW_COST = 50;
+export const ATS_CALCULATOR_COST = 10;
+export const ATS_ENHANCER_COST = 15;
 export const PREP_DAY_COMPLETION_REWARD = 15;
 export const HIGH_SCORE_MOCK_REWARD = 25;
 

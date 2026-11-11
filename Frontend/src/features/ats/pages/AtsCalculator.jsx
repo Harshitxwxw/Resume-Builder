@@ -21,13 +21,22 @@ import {
   AlertTriangle,
   Zap,
   Tag,
-  Wand2
+  Wand2,
+  Coins
 } from 'lucide-react'
 import {
   getSavedResumes,
   ACTIVE_RESUME_ID_KEY,
   CURRENT_RESUME_DATA_KEY
 } from '../../resume/services/resume.storage'
+import {
+  getUserCredits,
+  hasSufficientCredits,
+  deductCredits,
+  addCredits,
+  syncCreditsFromDb,
+  ATS_CALCULATOR_COST
+} from '../../credits/services/credits.storage'
 import {
   calculateAtsScoreApi,
   resumeDataToText,
@@ -77,6 +86,27 @@ const AtsCalculator = () => {
   const [result, setResult] = useState(null)
   const [errorMsg, setErrorMsg] = useState('')
 
+  // Credits System State (10 credits per ATS calculation)
+  const [userCredits, setUserCredits] = useState(() => getUserCredits())
+  const [showInsufficientModal, setShowInsufficientModal] = useState(false)
+  const [creditsToast, setCreditsToast] = useState('')
+
+  // Sync user credits on mount and on storage/event updates
+  useEffect(() => {
+    syncCreditsFromDb().then((bal) => {
+      if (typeof bal === 'number') setUserCredits(bal)
+    })
+
+    const handleCreditsUpdate = () => {
+      setUserCredits(getUserCredits())
+    }
+
+    window.addEventListener('career_credits_updated', handleCreditsUpdate)
+    return () => {
+      window.removeEventListener('career_credits_updated', handleCreditsUpdate)
+    }
+  }, [])
+
   // Load existing resumes on mount
   useEffect(() => {
     const list = getSavedResumes()
@@ -117,42 +147,71 @@ const AtsCalculator = () => {
     return savedResumes.find((r) => r.id === selectedResumeId)
   }
 
+  // Credits & input eligibility checks
+  const hasEnoughCredits = userCredits >= ATS_CALCULATOR_COST
+  const hasValidResumeInput =
+    (resumeSource === 'existing' && Boolean(selectedResumeId)) ||
+    (resumeSource === 'upload' && Boolean(uploadedFile)) ||
+    (resumeSource === 'paste' && Boolean(pastedText.trim()))
+  const canCalculate = hasEnoughCredits && !loading && hasValidResumeInput && Boolean(jobDescription.trim())
+
   // Trigger calculation
   const handleCalculateAts = async () => {
     setErrorMsg('')
+
+    // 1. Verify credits first
+    if (!hasSufficientCredits(ATS_CALCULATOR_COST)) {
+      setShowInsufficientModal(true)
+      return
+    }
+
+    // 2. Validate inputs
+    let resumeText = ''
+    let resumeData = null
+    let resumeFile = null
+
+    if (resumeSource === 'existing') {
+      const found = getSelectedResumeData()
+      if (!found) {
+        setErrorMsg('Please select a resume to analyze.')
+        return
+      }
+      resumeData = found.data
+      resumeText = resumeDataToText(found.data)
+    } else if (resumeSource === 'upload') {
+      if (!uploadedFile) {
+        setErrorMsg('Please upload a PDF resume file.')
+        return
+      }
+      resumeFile = uploadedFile
+    } else {
+      if (!pastedText.trim()) {
+        setErrorMsg('Please paste your resume text.')
+        return
+      }
+      resumeText = pastedText.trim()
+    }
+
+    if (!jobDescription.trim()) {
+      setErrorMsg('Please provide a job description for ATS comparison.')
+      return
+    }
+
+    // 3. Deduct 10 credits
+    const deduction = deductCredits(ATS_CALCULATOR_COST, 'ATS Score Calculation')
+    if (!deduction.success) {
+      setShowInsufficientModal(true)
+      return
+    }
+
+    setUserCredits(deduction.newBalance)
+    setCreditsToast(`🪙 10 Credits used for ATS Score Calculation. Remaining: ${deduction.newBalance} credits.`)
+    setTimeout(() => setCreditsToast(''), 3500)
+
     setLoading(true)
     setLoadingStep('Reading resume & extracting ATS tokens...')
 
     try {
-      let resumeText = ''
-      let resumeData = null
-      let resumeFile = null
-
-      if (resumeSource === 'existing') {
-        const found = getSelectedResumeData()
-        if (!found) {
-          setErrorMsg('Please select a resume to analyze.')
-          setLoading(false)
-          return
-        }
-        resumeData = found.data
-        resumeText = resumeDataToText(found.data)
-      } else if (resumeSource === 'upload') {
-        if (!uploadedFile) {
-          setErrorMsg('Please upload a PDF resume file.')
-          setLoading(false)
-          return
-        }
-        resumeFile = uploadedFile
-      } else {
-        if (!pastedText.trim()) {
-          setErrorMsg('Please paste your resume text.')
-          setLoading(false)
-          return
-        }
-        resumeText = pastedText.trim()
-      }
-
       setLoadingStep('Auditing against job description with Gemini AI...')
       const evalResult = await calculateAtsScoreApi({
         resumeText,
@@ -174,6 +233,11 @@ const AtsCalculator = () => {
     } catch (err) {
       console.error('Calculation error:', err)
       setErrorMsg('Failed to calculate ATS score. Please check your inputs.')
+      // Auto-refund credits on error
+      addCredits(ATS_CALCULATOR_COST, 'ATS Calculation Refund (Error)')
+      setUserCredits(getUserCredits())
+      setCreditsToast('⚠️ Calculation failed. 10 Credits refunded to your balance.')
+      setTimeout(() => setCreditsToast(''), 4000)
     } finally {
       setLoading(false)
       setLoadingStep('')
@@ -500,12 +564,36 @@ const AtsCalculator = () => {
             </div>
           )}
 
+          {/* Insufficient Credits Banner (Requires 10 Credits) */}
+          {!hasEnoughCredits && (
+            <div className="credits-insufficient-banner">
+              <AlertCircle size={15} />
+              <div className="banner-text">
+                <span>You need <strong>10 Credits</strong> to calculate ATS score. Your balance: <strong>{userCredits} Credits</strong>.</span>
+                <button
+                  type="button"
+                  className="banner-earn-link"
+                  onClick={() => navigate('/plan-tracker')}
+                >
+                  Earn +15 in Plan Tracker →
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Submit Button */}
           <button
             type="button"
-            className="btn btn-calculate-cta"
-            disabled={loading}
+            className={`btn btn-calculate-cta ${!canCalculate ? 'disabled-btn' : ''} ${!hasEnoughCredits ? 'insufficient-btn' : ''}`}
+            disabled={!canCalculate || loading}
             onClick={handleCalculateAts}
+            title={
+              !hasEnoughCredits
+                ? `Insufficient credits (10 required). Current balance: ${userCredits}`
+                : !canCalculate
+                  ? 'Please select/paste a resume and provide job description'
+                  : 'Calculate ATS Score with AI (10 Credits)'
+            }
           >
             {loading ? (
               <>
@@ -516,6 +604,10 @@ const AtsCalculator = () => {
               <>
                 <Zap size={17} />
                 <span>Calculate ATS Score with AI</span>
+                <span className="btn-cost-badge">
+                  <Coins size={13} className="cost-coins-icon" />
+                  <span>10 Credits</span>
+                </span>
               </>
             )}
           </button>
@@ -783,6 +875,61 @@ const AtsCalculator = () => {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Credits Toast Notification */}
+      {creditsToast && (
+        <div className="ats-credits-toast">
+          <span>{creditsToast}</span>
+        </div>
+      )}
+
+      {/* Insufficient Credits Dialog */}
+      {showInsufficientModal && (
+        <div className="credits-modal-backdrop" onClick={() => setShowInsufficientModal(false)}>
+          <div className="credits-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-coin-badge">
+              <Coins size={30} />
+            </div>
+            <h3>Insufficient Credits</h3>
+            <p className="modal-lead">
+              You need <strong>10 Credits</strong> to calculate your ATS Score. Your current balance is <strong>{userCredits} Credits</strong>.
+            </p>
+
+            <div className="modal-ways-list">
+              <span className="ways-title">Ways to Earn Credits:</span>
+              <div className="way-item">
+                <span className="way-badge">+15</span>
+                <span>Complete daily study roadmap tasks in <strong>Plan Tracker</strong></span>
+              </div>
+              <div className="way-item">
+                <span className="way-badge">+25</span>
+                <span>Score 8.0 or higher in a <strong>Mock AI Interview</strong></span>
+              </div>
+            </div>
+
+            <div className="modal-btn-row">
+              <button
+                type="button"
+                className="btn-earn-plan"
+                onClick={() => {
+                  setShowInsufficientModal(false)
+                  navigate('/plan-tracker')
+                }}
+              >
+                <Sparkles size={14} />
+                <span>Earn in Plan Tracker (+15 Credits)</span>
+              </button>
+              <button
+                type="button"
+                className="btn-cancel"
+                onClick={() => setShowInsufficientModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </main>

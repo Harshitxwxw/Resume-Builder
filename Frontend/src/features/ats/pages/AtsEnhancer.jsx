@@ -19,7 +19,8 @@ import {
   Sliders,
   ChevronRight,
   TrendingUp,
-  Tag
+  Tag,
+  Coins
 } from 'lucide-react'
 import {
   getSavedResumes,
@@ -28,6 +29,14 @@ import {
   ACTIVE_RESUME_ID_KEY,
   CURRENT_RESUME_DATA_KEY
 } from '../../resume/services/resume.storage'
+import {
+  getUserCredits,
+  hasSufficientCredits,
+  deductCredits,
+  addCredits,
+  syncCreditsFromDb,
+  ATS_ENHANCER_COST
+} from '../../credits/services/credits.storage'
 import { getUserScopedKey } from '../../../utils/userScope'
 import {
   enhanceResumeApi,
@@ -47,6 +56,10 @@ const AtsEnhancer = () => {
   const [jobDescription, setJobDescription] = useState('')
   const [enhancementFocus, setEnhancementFocus] = useState('all') // 'all', 'summary', 'experience', 'skills', 'projects'
 
+  // Credits System State (15 credits per ATS enhancement)
+  const [userCredits, setUserCredits] = useState(() => getUserCredits())
+  const [showInsufficientModal, setShowInsufficientModal] = useState(false)
+
   // Loading & Results
   const [loading, setLoading] = useState(false)
   const [loadingStep, setLoadingStep] = useState('')
@@ -54,6 +67,22 @@ const AtsEnhancer = () => {
   const [activeTab, setActiveTab] = useState('diff') // 'diff' | 'full' | 'summary' | 'experience'
   const [toastMessage, setToastMessage] = useState('')
   const [copiedSection, setCopiedSection] = useState('')
+
+  // Sync user credits on mount and on storage/event updates
+  useEffect(() => {
+    syncCreditsFromDb().then((bal) => {
+      if (typeof bal === 'number') setUserCredits(bal)
+    })
+
+    const handleCreditsUpdate = () => {
+      setUserCredits(getUserCredits())
+    }
+
+    window.addEventListener('career_credits_updated', handleCreditsUpdate)
+    return () => {
+      window.removeEventListener('career_credits_updated', handleCreditsUpdate)
+    }
+  }, [])
 
   useEffect(() => {
     const list = getSavedResumes()
@@ -76,12 +105,16 @@ const AtsEnhancer = () => {
 
   const showToast = (msg) => {
     setToastMessage(msg)
-    setTimeout(() => setToastMessage(''), 2800)
+    setTimeout(() => setToastMessage(''), 3200)
   }
 
   const getSelectedResume = () => {
     return savedResumes.find((r) => r.id === selectedResumeId)
   }
+
+  // Credit & resume eligibility
+  const hasEnoughCredits = userCredits >= ATS_ENHANCER_COST
+  const canEnhance = hasEnoughCredits && !loading && savedResumes.length > 0 && Boolean(selectedResumeId)
 
   const handleEnhance = async () => {
     const resume = getSelectedResume()
@@ -89,6 +122,22 @@ const AtsEnhancer = () => {
       showToast('Please select a resume to enhance.')
       return
     }
+
+    // 1. Verify credits first
+    if (!hasSufficientCredits(ATS_ENHANCER_COST)) {
+      setShowInsufficientModal(true)
+      return
+    }
+
+    // 2. Deduct 15 credits
+    const deduction = deductCredits(ATS_ENHANCER_COST, 'ATS Resume Enhancement')
+    if (!deduction.success) {
+      setShowInsufficientModal(true)
+      return
+    }
+
+    setUserCredits(deduction.newBalance)
+    showToast(`🪙 15 Credits used. Remaining balance: ${deduction.newBalance} credits.`)
 
     setLoading(true)
     setLoadingStep('Analyzing current resume structure & gaps...')
@@ -114,7 +163,10 @@ const AtsEnhancer = () => {
       }, 100)
     } catch (err) {
       console.error(err)
-      showToast('Enhancement failed. Please try again.')
+      showToast('⚠️ Enhancement failed. 15 Credits refunded to your balance.')
+      // Auto-refund credits on error
+      addCredits(ATS_ENHANCER_COST, 'ATS Enhancement Refund (Error)')
+      setUserCredits(getUserCredits())
     } finally {
       setLoading(false)
       setLoadingStep('')
@@ -296,11 +348,35 @@ const AtsEnhancer = () => {
             </div>
           </div>
 
+          {/* Insufficient Credits Banner (Requires 15 Credits) */}
+          {!hasEnoughCredits && (
+            <div className="credits-insufficient-banner">
+              <AlertCircle size={15} />
+              <div className="banner-text">
+                <span>You need <strong>15 Credits</strong> to enhance your resume with AI. Your balance: <strong>{userCredits} Credits</strong>.</span>
+                <button
+                  type="button"
+                  className="banner-earn-link"
+                  onClick={() => navigate('/plan-tracker')}
+                >
+                  Earn +15 in Plan Tracker →
+                </button>
+              </div>
+            </div>
+          )}
+
           <button
             type="button"
-            className="btn btn-enhance-main"
-            disabled={loading || savedResumes.length === 0}
+            className={`btn btn-enhance-main ${!canEnhance ? 'disabled-btn' : ''} ${!hasEnoughCredits ? 'insufficient-btn' : ''}`}
+            disabled={!canEnhance || loading}
             onClick={handleEnhance}
+            title={
+              !hasEnoughCredits
+                ? `Insufficient credits (15 required). Current balance: ${userCredits}`
+                : savedResumes.length === 0
+                  ? 'Please create a resume first to enhance'
+                  : 'Enhance Resume with AI (15 Credits)'
+            }
           >
             {loading ? (
               <>
@@ -311,6 +387,10 @@ const AtsEnhancer = () => {
               <>
                 <Sparkles size={17} />
                 <span>Enhance Resume with AI Now</span>
+                <span className="btn-cost-badge">
+                  <Coins size={13} className="cost-coins-icon" />
+                  <span>15 Credits</span>
+                </span>
               </>
             )}
           </button>
@@ -558,6 +638,54 @@ const AtsEnhancer = () => {
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Insufficient Credits Dialog */}
+      {showInsufficientModal && (
+        <div className="credits-modal-backdrop" onClick={() => setShowInsufficientModal(false)}>
+          <div className="credits-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-coin-badge">
+              <Coins size={30} />
+            </div>
+            <h3>Insufficient Credits</h3>
+            <p className="modal-lead">
+              You need <strong>15 Credits</strong> to enhance your resume with AI. Your current balance is <strong>{userCredits} Credits</strong>.
+            </p>
+
+            <div className="modal-ways-list">
+              <span className="ways-title">Ways to Earn Credits:</span>
+              <div className="way-item">
+                <span className="way-badge">+15</span>
+                <span>Complete daily study roadmap tasks in <strong>Plan Tracker</strong></span>
+              </div>
+              <div className="way-item">
+                <span className="way-badge">+25</span>
+                <span>Score 8.0 or higher in a <strong>Mock AI Interview</strong></span>
+              </div>
+            </div>
+
+            <div className="modal-btn-row">
+              <button
+                type="button"
+                className="btn-earn-plan"
+                onClick={() => {
+                  setShowInsufficientModal(false)
+                  navigate('/plan-tracker')
+                }}
+              >
+                <Sparkles size={14} />
+                <span>Earn in Plan Tracker (+15 Credits)</span>
+              </button>
+              <button
+                type="button"
+                className="btn-cancel"
+                onClick={() => setShowInsufficientModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </main>
