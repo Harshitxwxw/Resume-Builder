@@ -872,7 +872,7 @@ const ResumeCreator = () => {
     >
       {/* ---- Subheader Action Bar ---- */}
       <div className="rc-action-bar">
-        <button className="rc-back-btn" onClick={() => navigate('/')}>
+        <button className="rc-back-btn" onClick={() => navigate('/dashboard')}>
           <ArrowLeft size={16} strokeWidth={2.2} />
           <span>Back to Dashboard</span>
         </button>
@@ -2171,7 +2171,7 @@ const ResumeCreator = () => {
               <button
                 type="button"
                 className="rc-modal-btn primary"
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/dashboard')}
               >
                 <ArrowLeft size={16} />
                 <span>Go to Dashboard</span>

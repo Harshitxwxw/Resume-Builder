@@ -14,7 +14,7 @@ const Register = () => {
 
     // If already authenticated, redirect to dashboard
     if (!loading && user) {
-        return <Navigate to="/" replace />;
+        return <Navigate to="/dashboard" replace />;
     }
 
     const handleSubmit = async (e) => {
@@ -23,7 +23,7 @@ const Register = () => {
         setSubmitting(true);
         try {
             await handleRegister(username, email, password);
-            navigate("/", { replace: true });
+            navigate("/dashboard", { replace: true });
         } catch (err) {
             setErrorMsg(err.response?.data?.message || "Registration failed");
         } finally {

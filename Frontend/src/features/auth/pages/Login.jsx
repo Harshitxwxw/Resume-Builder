@@ -14,7 +14,7 @@ const Login = () => {
 
     // If already authenticated, always redirect to dashboard
     if (!loading && user) {
-        return <Navigate to="/" replace />;
+        return <Navigate to="/dashboard" replace />;
     }
 
     const handleSubmit = async (e) => {
@@ -24,7 +24,7 @@ const Login = () => {
         try {
             await handleLogin(email, password);
             // Always redirect newly logged-in users to Dashboard
-            navigate("/", { replace: true });
+            navigate("/dashboard", { replace: true });
         } catch (err) {
             setErrorMsg(err.response?.data?.message || "Invalid email or password");
         } finally {

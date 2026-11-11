@@ -19,7 +19,7 @@ import './sidebar.scss'
 const NAV_ITEMS = [
   {
     label: 'Dashboard',
-    to: '/',
+    to: '/dashboard',
     icon: <LayoutDashboard size={20} strokeWidth={2} />,
   },
   {
@@ -114,7 +114,12 @@ const Sidebar = () => {
     <>
       <aside className="sidebar">
         {/* ---- Brand ---- */}
-        <div className="sidebar__brand">
+        <div
+          className="sidebar__brand"
+          onClick={() => navigate('/dashboard')}
+          style={{ cursor: 'pointer' }}
+          title="Go to Dashboard"
+        >
           <span className="sidebar__brand-icon">✦</span>
           <span className="sidebar__brand-name">CareerAI</span>
         </div>
@@ -126,7 +131,7 @@ const Sidebar = () => {
             <NavLink
               key={item.to}
               to={item.to}
-              end={item.to === '/'}
+              end={item.to === '/dashboard'}
               className={({ isActive }) =>
                 `sidebar__nav-item${isActive ? ' active' : ''}`
               }

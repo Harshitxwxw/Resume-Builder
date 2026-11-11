@@ -64,7 +64,7 @@ const INITIAL_NOTIFICATIONS = [
 ]
 
 const QUICK_SEARCH_TOOLS = [
-  { label: 'Dashboard', to: '/', desc: 'Overview & tools hub', icon: LayoutDashboard },
+  { label: 'Dashboard', to: '/dashboard', desc: 'Overview & tools hub', icon: LayoutDashboard },
   { label: 'Mock AI Interview Agent', to: '/mock-interview', desc: 'Interactive voice & text interview simulation', icon: Bot },
   { label: 'My Profile', to: '/profile', desc: 'Skills, bio, projects & experience', icon: User },
   { label: 'Wishlist', to: '/wishlist', desc: 'Saved reports & resumes collection', icon: Bookmark },
@@ -208,6 +208,7 @@ const TopBar = () => {
   const getPageInfo = () => {
     switch (location.pathname) {
       case '/':
+      case '/dashboard':
         return { title: 'Dashboard', icon: LayoutDashboard }
       case '/resume-creator':
         return { title: 'Resume Creator', icon: FilePlus }

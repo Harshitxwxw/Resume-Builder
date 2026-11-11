@@ -6,6 +6,7 @@ import Layout from "./components/Layout";
 
 // Pages
 import Dashboard from "./features/dashboard/pages/Dashboard";
+import LandingPage from "./features/landing/pages/LandingPage";
 import InterviewReportGenerator from "./features/interview/pages/Home";
 import Report from "./features/interview/pages/Report.jsx";
 import ResumeCreator from "./features/resume/pages/ResumeCreator";
@@ -28,6 +29,10 @@ const withLayout = (Page) => (
 export const router = createBrowserRouter([
     // ---- Public routes ----
     {
+        path: "/",
+        element: <LandingPage />
+    },
+    {
         path: "/login",
         element: <Login />
     },
@@ -38,7 +43,7 @@ export const router = createBrowserRouter([
 
     // ---- Protected + Layout routes ----
     {
-        path: "/",
+        path: "/dashboard",
         element: withLayout(Dashboard)
     },
     {

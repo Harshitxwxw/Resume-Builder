@@ -182,7 +182,7 @@ const Wishlist = () => {
           <button
             type="button"
             className="btn btn-back-dashboard"
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/dashboard')}
           >
             <ArrowLeft size={16} />
             <span>Back to Dashboard</span>
@@ -265,7 +265,7 @@ const Wishlist = () => {
             <button
               type="button"
               className="btn btn-empty-primary"
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/dashboard')}
             >
               <span>Explore Dashboard</span>
               <ArrowRight size={15} />
