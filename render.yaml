@@ -1,7 +1,7 @@
 services:
   - type: web
     name: Career-AI
-    env: static
+    runtime: static
     rootDir: Frontend
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
