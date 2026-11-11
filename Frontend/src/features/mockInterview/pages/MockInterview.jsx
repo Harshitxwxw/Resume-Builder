@@ -1034,12 +1034,17 @@ export default function MockInterview() {
               onToggleMic={toggleRecording}
             />
 
-            {/* Interviewer Subtitle Box */}
+            {/* Interviewer Status / Feedback Caption Box */}
             <div className="interviewer-caption-card">
+              <span className={`caption-pulse-dot ${isRecording ? 'recording' : isSpeaking ? 'speaking' : ''}`} />
               <p>
                 {hasSubmittedCurrent && currentFeedback?.feedback
                   ? currentFeedback.feedback
-                  : currentQ.text}
+                  : isSpeaking
+                    ? "AI Interviewer speaking..."
+                    : isRecording
+                      ? "Listening to your answer..."
+                      : "Ready for your answer"}
               </p>
             </div>
 
@@ -1136,7 +1141,7 @@ export default function MockInterview() {
                 </div>
               )}
               <textarea
-                rows={9}
+                rows={5}
                 className={`answer-textarea ${isRecording ? 'recording-active' : ''}`}
                 placeholder={
                   isRecording

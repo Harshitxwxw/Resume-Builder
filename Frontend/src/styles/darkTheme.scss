@@ -3563,7 +3563,18 @@
     }
 
     .interview-live-container {
-      background: var(--bg-canvas) !important;
+      background: var(--bg-card) !important;
+      border: 1px solid var(--border-card) !important;
+
+      .interview-left-col {
+        background: #0b1322 !important;
+        border-right: 1px solid var(--border-card) !important;
+      }
+
+      .avatar-interviewer-card {
+        background: #0f172a !important;
+        border: 1px solid var(--border-card) !important;
+      }
 
       .interviewer-caption-card,
       .interview-status-card,
@@ -3573,9 +3584,21 @@
         border: 1px solid var(--border-card) !important;
         color: var(--text-primary) !important;
 
-        p, .question-text {
+        p, .question-text, .status-label, .stat-lbl {
+          color: var(--text-secondary) !important;
+        }
+
+        .stat-num, .timer-seconds {
           color: var(--text-primary) !important;
         }
+      }
+
+      .interview-status-card .status-bottom-row {
+        border-top-color: var(--border-card) !important;
+      }
+
+      .timer-svg .timer-bg {
+        stroke: #1e293b !important;
       }
 
       .answer-input-card .answer-textarea {
@@ -3587,6 +3610,10 @@
           border-color: var(--border-focus) !important;
           background: #141f33 !important;
         }
+      }
+
+      .interview-right-title {
+        color: #34d399 !important;
       }
     }
 
