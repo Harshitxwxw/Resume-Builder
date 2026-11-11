@@ -41,6 +41,26 @@ export const ThemeProvider = ({ children }) => {
     }
   }, [theme])
 
+  // Synchronize across tabs or custom theme change events
+  useEffect(() => {
+    const handleStorage = (e) => {
+      if (e.key === THEME_STORAGE_KEY && (e.newValue === 'dark' || e.newValue === 'light')) {
+        setThemeState(e.newValue)
+      }
+    }
+    const handleCustomChange = (e) => {
+      if (e.detail?.theme && (e.detail.theme === 'dark' || e.detail.theme === 'light')) {
+        setThemeState(e.detail.theme)
+      }
+    }
+    window.addEventListener('storage', handleStorage)
+    window.addEventListener('career_theme_changed', handleCustomChange)
+    return () => {
+      window.removeEventListener('storage', handleStorage)
+      window.removeEventListener('career_theme_changed', handleCustomChange)
+    }
+  }, [])
+
   const toggleTheme = () => {
     setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'))
   }

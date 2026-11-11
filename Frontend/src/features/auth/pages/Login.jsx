@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import '../auth.form.scss'
 import { useNavigate, Link, Navigate } from "react-router-dom"
 import { useAuth } from "../hooks/useAuth"
+import { useTheme } from "../../../context/ThemeContext"
 import {
   Mail,
   Lock,
@@ -12,12 +13,15 @@ import {
   AlertCircle,
   Sparkles,
   ShieldCheck,
-  CheckCircle2
+  CheckCircle2,
+  Sun,
+  Moon
 } from 'lucide-react'
 
 const Login = () => {
   const navigate = useNavigate()
   const { user, loading, handleLogin } = useAuth()
+  const { theme, isDark, toggleTheme } = useTheme()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -46,26 +50,37 @@ const Login = () => {
 
   if (loading && !user) {
     return (
-      <main className="auth-page">
+      <main className={`auth-page ${isDark ? 'dark' : 'light'}`} data-theme={theme}>
         <div className="auth-card" style={{ alignItems: 'center', textAlign: 'center' }}>
           <div className="spinner" style={{ width: '28px', height: '28px', border: '3px solid #3b82f6', borderTopColor: 'transparent', borderRadius: '50%', animation: 'authSpin 0.8s linear infinite' }} />
-          <p style={{ marginTop: '14px', color: '#94a3b8', fontSize: '14px' }}>Verifying authentication...</p>
+          <p style={{ marginTop: '14px', color: 'var(--auth-text-muted)', fontSize: '14px' }}>Verifying authentication...</p>
         </div>
       </main>
     )
   }
 
   return (
-    <main className="auth-page">
+    <main className={`auth-page ${isDark ? 'dark' : 'light'}`} data-theme={theme}>
       {/* Background ambient lighting */}
       <div className="auth-ambient-glow glow-1" />
       <div className="auth-ambient-glow glow-2" />
 
-      {/* Top back navigation */}
+      {/* Top back navigation & Theme toggle */}
       <div className="auth-top-nav">
         <Link to="/" className="back-home-link">
           <ArrowLeft size={16} />
+          <span>Back to Home</span>
         </Link>
+
+        <button
+          type="button"
+          className="auth-theme-toggle-btn"
+          onClick={toggleTheme}
+          title={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+          aria-label="Toggle Theme"
+        >
+          {isDark ? <Sun size={17} /> : <Moon size={17} />}
+        </button>
       </div>
 
       <div className="auth-card">
@@ -101,7 +116,7 @@ const Login = () => {
                 type="email"
                 id="email"
                 name="email"
-                placeholder="Enter Your Email"
+                placeholder="name@example.com"
                 value={email}
                 required
                 autoComplete="email"
@@ -163,7 +178,7 @@ const Login = () => {
         <div className="auth-card-footer">
           <span>Don't have an account?</span>
           <Link to="/register" className="switch-link">
-            Sign up
+            Sign up free
           </Link>
         </div>
 

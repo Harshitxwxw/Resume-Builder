@@ -13,7 +13,7 @@
   --lp-text-head: #0f172a;
   --lp-text-body: #334155;
   --lp-text-muted: #64748b;
-  --lp-nav-bg: rgba(255, 255, 255, 0.88);
+  --lp-nav-bg: #ffffff; // 100% solid white prevents underlying text from bleeding through
   --lp-glow: rgba(59, 130, 246, 0.12);
   --lp-primary: #2563eb;
   --lp-primary-hover: #1d4ed8;
@@ -39,7 +39,7 @@
     --lp-text-head: #f8fafc;
     --lp-text-body: #cbd5e1;
     --lp-text-muted: #8493a8;
-    --lp-nav-bg: rgba(11, 15, 25, 0.88);
+    --lp-nav-bg: #0b0f19; // 100% solid dark canvas prevents text bleed-through
     --lp-glow: rgba(59, 130, 246, 0.18);
     --lp-primary: #3b82f6;
     --lp-primary-hover: #60a5fa;
@@ -192,11 +192,9 @@
     width: 100%;
     z-index: 1000;
     background-color: var(--lp-nav-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--lp-border);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-    transition: background-color 0.25s ease, border-color 0.25s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 
     .nav-container {
       max-width: 1240px;

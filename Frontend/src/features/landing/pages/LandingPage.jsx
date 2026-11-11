@@ -192,7 +192,6 @@ const LandingPage = () => {
           <Link to="/" className="nav-brand">
             <span className="brand-icon">✦</span>
             <span className="brand-name">CareerAI</span>
-            <span className="brand-badge">PRO</span>
           </Link>
 
           <nav className="nav-links">
@@ -231,7 +230,7 @@ const LandingPage = () => {
                   Sign In
                 </Link>
                 <Link to="/register" className="btn btn-primary nav-cta">
-                  <span>Sign Up Free</span>
+                  <span>Sign Up </span>
                   <ArrowRight size={15} />
                 </Link>
               </div>
