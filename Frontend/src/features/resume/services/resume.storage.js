@@ -5,14 +5,31 @@ export const SAVED_RESUMES_KEY = 'career_ai_saved_resumes';
 export const ACTIVE_RESUME_ID_KEY = 'career_ai_active_resume_id';
 export const CURRENT_RESUME_DATA_KEY = 'career_ai_resume_data';
 
+/**
+ * Sync finished resumes from MongoDB to local storage cache,
+ * and asynchronously cleans up any ghost/untitled empty resumes.
+ */
 export const syncResumesFromDb = async () => {
   try {
     const dbResumes = await fetchAllResumes();
     if (Array.isArray(dbResumes)) {
-      const normalized = dbResumes.map((r) => ({
+      // Filter out and clean up any ghost untitled resumes or unfinished drafts
+      const cleaned = dbResumes.filter((r) => {
+        if (r.isFinished === false) return false;
+        const fullName = r.data?.personal?.fullName?.trim();
+        // If it was created accidentally with no name or title "- Resume"
+        if ((r.title === '- Resume' || !r.title) && (!fullName || fullName === 'Full Name')) {
+          deleteResumeFromDb(r._id || r.id).catch(() => {});
+          return false;
+        }
+        return true;
+      });
+
+      const normalized = cleaned.map((r) => ({
         ...r,
         id: String(r._id || r.id)
       }));
+
       localStorage.setItem(getUserScopedKey(SAVED_RESUMES_KEY), JSON.stringify(normalized));
       window.dispatchEvent(new CustomEvent('career_resume_saved'));
       return normalized;
@@ -23,6 +40,10 @@ export const syncResumesFromDb = async () => {
   return getSavedResumes();
 };
 
+/**
+ * Returns list of completed / saved resumes from user's local storage.
+ * Drafts being edited or ghost "- Resume" items are filtered out.
+ */
 export const getSavedResumes = () => {
   try {
     const scopedKey = getUserScopedKey(SAVED_RESUMES_KEY);
@@ -30,10 +51,19 @@ export const getSavedResumes = () => {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
-        return parsed.filter((r) => r.isFinished !== false).map((r) => ({
-          ...r,
-          id: String(r._id || r.id)
-        }));
+        return parsed
+          .filter((r) => {
+            if (r.isFinished === false) return false;
+            const fullName = r.data?.personal?.fullName?.trim();
+            if ((r.title === '- Resume' || !r.title) && (!fullName || fullName === 'Full Name')) {
+              return false;
+            }
+            return true;
+          })
+          .map((r) => ({
+            ...r,
+            id: String(r._id || r.id)
+          }));
       }
     }
   } catch (e) {
@@ -44,77 +74,125 @@ export const getSavedResumes = () => {
 };
 
 /**
- * Save resume changes (updates active draft or existing resume and syncs to MongoDB)
+ * Save resume changes.
+ * If this is an unsaved draft (not finished and not in saved resumes),
+ * it only updates local session draft, NEVER creates duplicates in DB!
  */
-export const saveResume = (resumeItem) => {
+export const saveResume = async (resumeItem) => {
   if (!resumeItem || !resumeItem.id) return [];
   const list = getSavedResumes();
   const existingIdx = list.findIndex((r) => String(r.id) === String(resumeItem.id));
-  const updatedItem = {
+
+  // If this is an uncommitted draft and NOT finished, keep it local only
+  if (existingIdx < 0 && resumeItem.isFinished !== true) {
+    try {
+      localStorage.setItem(getUserScopedKey(CURRENT_RESUME_DATA_KEY), JSON.stringify(resumeItem.data));
+      localStorage.setItem(getUserScopedKey(ACTIVE_RESUME_ID_KEY), resumeItem.id);
+      if (resumeItem.layout) localStorage.setItem(getUserScopedKey('career_ai_resume_layout'), resumeItem.layout);
+      if (resumeItem.font) localStorage.setItem(getUserScopedKey('career_ai_resume_font'), resumeItem.font);
+    } catch (e) {
+      console.warn(e);
+    }
+    return list;
+  }
+
+  let updatedItem = {
     ...resumeItem,
     id: String(resumeItem._id || resumeItem.id),
     updatedAt: new Date().toISOString()
   };
 
-  let newList = [...list];
+  const dbId = (updatedItem.id && updatedItem.id.length === 24 && !updatedItem.id.startsWith('res-')) 
+    ? updatedItem.id 
+    : undefined;
 
-  if (existingIdx >= 0) {
-    newList[existingIdx] = updatedItem;
-    try {
-      localStorage.setItem(getUserScopedKey(SAVED_RESUMES_KEY), JSON.stringify(newList));
-    } catch (e) {
-      console.warn(e);
+  // Persist to MongoDB
+  try {
+    const savedDb = await saveResumeToDb({
+      id: dbId,
+      title: updatedItem.title,
+      data: updatedItem.data,
+      layout: updatedItem.layout,
+      font: updatedItem.font,
+      isFinished: true
+    });
+    if (savedDb && (savedDb._id || savedDb.id)) {
+      const realId = String(savedDb._id || savedDb.id);
+      updatedItem.id = realId;
+      updatedItem._id = realId;
     }
-  } else if (updatedItem.isFinished === true) {
-    newList = [updatedItem, ...list];
-    try {
-      localStorage.setItem(getUserScopedKey(SAVED_RESUMES_KEY), JSON.stringify(newList));
-    } catch (e) {
-      console.warn(e);
-    }
+  } catch (err) {
+    console.warn('Could not persist resume to MongoDB:', err);
   }
 
-  // Always update working draft
+  let newList = [...list];
+  const finalIdx = newList.findIndex((r) => String(r.id) === String(updatedItem.id));
+  if (finalIdx >= 0) {
+    newList[finalIdx] = updatedItem;
+  } else if (existingIdx >= 0) {
+    newList[existingIdx] = updatedItem;
+  } else if (updatedItem.isFinished === true) {
+    newList = [updatedItem, ...list];
+  }
+
+  // Update storage
   try {
+    localStorage.setItem(getUserScopedKey(SAVED_RESUMES_KEY), JSON.stringify(newList));
     localStorage.setItem(getUserScopedKey(CURRENT_RESUME_DATA_KEY), JSON.stringify(updatedItem.data));
     localStorage.setItem(getUserScopedKey(ACTIVE_RESUME_ID_KEY), updatedItem.id);
     if (updatedItem.layout) localStorage.setItem(getUserScopedKey('career_ai_resume_layout'), updatedItem.layout);
     if (updatedItem.font) localStorage.setItem(getUserScopedKey('career_ai_resume_font'), updatedItem.font);
+    window.dispatchEvent(new CustomEvent('career_resume_saved', { detail: updatedItem }));
   } catch (e) {
     console.warn('Error saving resume to localStorage:', e);
   }
-
-  // Persist to MongoDB
-  saveResumeToDb({
-    id: updatedItem.id.startsWith('res-') ? undefined : updatedItem.id,
-    title: updatedItem.title,
-    data: updatedItem.data,
-    layout: updatedItem.layout,
-    font: updatedItem.font,
-    isFinished: updatedItem.isFinished
-  }).catch((err) => console.warn('Could not persist resume to MongoDB:', err));
 
   return newList;
 };
 
 /**
- * Finish and permanently save a resume to MongoDB and local cache
+ * Finish and permanently save a resume to MongoDB and workspace
  */
-export const finishResume = (resumeItem) => {
+export const finishResume = async (resumeItem) => {
   if (!resumeItem || !resumeItem.id) return [];
   const list = getSavedResumes();
   const existingIdx = list.findIndex((r) => String(r.id) === String(resumeItem.id));
 
-  const finishedItem = {
+  let finishedItem = {
     ...resumeItem,
     id: String(resumeItem._id || resumeItem.id),
     isFinished: true,
     updatedAt: new Date().toISOString()
   };
 
-  let newList;
-  if (existingIdx >= 0) {
-    newList = [...list];
+  const dbId = (finishedItem.id && finishedItem.id.length === 24 && !finishedItem.id.startsWith('res-')) 
+    ? finishedItem.id 
+    : undefined;
+
+  // Persist to MongoDB
+  try {
+    const savedDb = await saveResumeToDb({
+      id: dbId,
+      title: finishedItem.title,
+      data: finishedItem.data,
+      layout: finishedItem.layout,
+      font: finishedItem.font,
+      isFinished: true
+    });
+    if (savedDb && (savedDb._id || savedDb.id)) {
+      const realId = String(savedDb._id || savedDb.id);
+      finishedItem.id = realId;
+      finishedItem._id = realId;
+    }
+  } catch (err) {
+    console.warn('Could not persist resume to MongoDB:', err);
+  }
+
+  let newList = [...list];
+  const finalIdx = newList.findIndex((r) => String(r.id) === String(finishedItem.id));
+  if (finalIdx >= 0) {
+    newList[finalIdx] = finishedItem;
+  } else if (existingIdx >= 0) {
     newList[existingIdx] = finishedItem;
   } else {
     newList = [finishedItem, ...list];
@@ -130,16 +208,6 @@ export const finishResume = (resumeItem) => {
   } catch (e) {
     console.warn('Error finishing resume:', e);
   }
-
-  // Persist to MongoDB
-  saveResumeToDb({
-    id: finishedItem.id.startsWith('res-') ? undefined : finishedItem.id,
-    title: finishedItem.title,
-    data: finishedItem.data,
-    layout: finishedItem.layout,
-    font: finishedItem.font,
-    isFinished: true
-  }).catch((err) => console.warn('Could not persist resume to MongoDB:', err));
 
   return newList;
 };

@@ -639,35 +639,42 @@ const ResumeCreator = () => {
     }
   }, [toastMessage])
 
-  // Save changes handler (auto-saves silently without repetitive toast)
-  const handleSave = (showToast = false) => {
+  // Save changes handler (auto-saves locally, only syncs to DB if already saved or explicitly requested)
+  const handleSave = async (showToast = false) => {
     try {
       localStorage.setItem(getUserScopedKey('career_ai_resume_data'), JSON.stringify(resumeData))
-      const activeId = localStorage.getItem(getUserScopedKey(ACTIVE_RESUME_ID_KEY)) || 'res-default'
-      const name = resumeData.personal?.fullName?.trim()
-      const prof = resumeData.personal?.profession?.trim()
-      const title = name && name !== 'Full Name'
-        ? `${name} - ${prof && prof !== 'Profession' ? prof : 'Resume'}`
-        : 'My ATS Resume'
+      const activeId = localStorage.getItem(getUserScopedKey(ACTIVE_RESUME_ID_KEY))
+      const list = getSavedResumes()
+      const existing = list.find((r) => r.id === activeId)
 
-      saveResume({
-        id: activeId,
-        title,
-        data: resumeData,
-        layout,
-        font: fontStyle,
-        accentColor
-      })
-      if (showToast) {
-        setToastMessage('Changes saved successfully!')
+      // Only sync to DB if this is an already completed resume or explicit user save
+      if (existing || showToast) {
+        const name = resumeData.personal?.fullName?.trim()
+        const prof = resumeData.personal?.profession?.trim()
+        const title = name && name !== 'Full Name'
+          ? `${name} - ${prof && prof !== 'Profession' ? prof : 'Resume'}`
+          : 'My ATS Resume'
+
+        await saveResume({
+          id: activeId || `res-${Date.now()}`,
+          title,
+          data: resumeData,
+          layout,
+          font: fontStyle,
+          accentColor,
+          isFinished: true
+        })
+        if (showToast) {
+          setToastMessage('Changes saved successfully!')
+        }
       }
     } catch (e) {
       console.error(e)
     }
   }
 
-  // Finish and permanently commit resume
-  const handleFinishResume = () => {
+  // Finish and permanently commit resume to workspace and DB
+  const handleFinishResume = async () => {
     try {
       localStorage.setItem(getUserScopedKey('career_ai_resume_data'), JSON.stringify(resumeData))
       const activeId = localStorage.getItem(getUserScopedKey(ACTIVE_RESUME_ID_KEY)) || `res-${Date.now()}`
@@ -677,7 +684,7 @@ const ResumeCreator = () => {
         ? `${name} - ${prof && prof !== 'Profession' ? prof : 'Resume'}`
         : 'My ATS Resume'
 
-      finishResume({
+      await finishResume({
         id: activeId,
         title,
         data: resumeData,
@@ -693,16 +700,24 @@ const ResumeCreator = () => {
     }
   }
 
-  // Navigation between steps: auto-saves silently on next & previous
+  // Navigation between steps: save active draft in localStorage only, NEVER duplicate in DB!
   const handleNext = () => {
-    handleSave(false)
+    try {
+      localStorage.setItem(getUserScopedKey('career_ai_resume_data'), JSON.stringify(resumeData))
+    } catch (e) {
+      console.warn(e)
+    }
     if (activeStep < STEPS.length - 1) {
       setActiveStep((prev) => prev + 1)
     }
   }
 
   const handlePrev = () => {
-    handleSave(false)
+    try {
+      localStorage.setItem(getUserScopedKey('career_ai_resume_data'), JSON.stringify(resumeData))
+    } catch (e) {
+      console.warn(e)
+    }
     if (activeStep > 0) {
       setActiveStep((prev) => prev - 1)
     }

@@ -2,7 +2,11 @@ const ResumeModel = require('../models/resume.model');
 
 async function getResumesController(req, res) {
   try {
-    const resumes = await ResumeModel.find({ user: req.user.id }).sort({ updatedAt: -1 });
+    const resumes = await ResumeModel.find({
+      user: req.user.id,
+      isFinished: { $ne: false },
+      title: { $ne: '- Resume' }
+    }).sort({ updatedAt: -1 });
     return res.status(200).json({
       message: 'Resumes fetched successfully',
       resumes
@@ -50,11 +54,11 @@ async function createOrUpdateResumeController(req, res) {
     } else {
       resume = await ResumeModel.create({
         user: req.user.id,
-        title: title || data?.personal?.fullName ? `${data.personal.fullName} - ${data.personal.profession || 'Resume'}` : 'Untitled Resume',
+        title: title || (data?.personal?.fullName ? `${data.personal.fullName} - ${data.personal.profession || 'Resume'}` : 'My ATS Resume'),
         data: data || {},
         layout: layout || 'single',
         font: font || 'inter',
-        isFinished: isFinished !== false
+        isFinished: isFinished === true
       });
     }
 
