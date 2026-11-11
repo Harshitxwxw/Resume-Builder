@@ -72,7 +72,6 @@ const Register = () => {
       <div className="auth-top-nav">
         <Link to="/" className="back-home-link">
           <ArrowLeft size={16} />
-          <span>Back to Home</span>
         </Link>
 
         <button
@@ -92,17 +91,13 @@ const Register = () => {
           <Link to="/" className="brand-badge-link">
             <span className="brand-icon">✦</span>
             <span className="brand-name">CareerAI</span>
-            <span className="brand-pill">PRO</span>
           </Link>
           <h1 className="auth-title">Create your account</h1>
           <p className="auth-subtitle">
             Join CareerAI to build ATS resumes and ace your interviews with AI.
           </p>
 
-          <div className="auth-credits-banner">
-            <Coins size={14} />
-            <span>100 Free Credits Included On Signup</span>
-          </div>
+
         </div>
 
         {/* Error Alert */}
@@ -117,14 +112,14 @@ const Register = () => {
         <form className="auth-form" onSubmit={handleSubmit}>
           {/* Username Field */}
           <div className="form-field">
-            <label htmlFor="username">Full Name or Username</label>
+            <label htmlFor="username">Full Username</label>
             <div className="input-wrapper">
               <User size={17} className="field-icon" />
               <input
                 type="text"
                 id="username"
                 name="username"
-                placeholder="e.g. Alex Morgan"
+                placeholder="Enter Your Name"
                 value={username}
                 required
                 autoComplete="name"
@@ -142,7 +137,7 @@ const Register = () => {
                 type="email"
                 id="email"
                 name="email"
-                placeholder="name@example.com"
+                placeholder="Enter Your Email"
                 value={email}
                 required
                 autoComplete="email"
@@ -191,7 +186,7 @@ const Register = () => {
               </>
             ) : (
               <>
-                <span>Get Started Free</span>
+                <span>Create Account</span>
                 <ArrowRight size={16} />
               </>
             )}

@@ -268,7 +268,7 @@ const LandingPage = () => {
               className="btn btn-hero-primary"
               onClick={() => handleCtaClick('/dashboard')}
             >
-              <span>{user ? 'Launch Your Dashboard' : 'Get Started Free — 100 Credits'}</span>
+              <span>{user ? 'Launch Your Dashboard' : 'Get Started — 100 Credits'}</span>
               <ArrowRight size={18} />
             </button>
 
@@ -957,7 +957,7 @@ const LandingPage = () => {
                 className="btn btn-hero-primary"
                 onClick={() => handleCtaClick('/dashboard')}
               >
-                <span>{user ? 'Go to Your Dashboard' : 'Create Free Account — 100 Credits'}</span>
+                <span>{user ? 'Go to Your Dashboard' : 'Create Account — 100 Credits'}</span>
                 <ArrowRight size={18} />
               </button>
 
