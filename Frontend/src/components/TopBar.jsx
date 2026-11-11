@@ -66,13 +66,13 @@ const INITIAL_NOTIFICATIONS = [
 const QUICK_SEARCH_TOOLS = [
   { label: 'Dashboard', to: '/dashboard', desc: 'Overview & tools hub', icon: LayoutDashboard },
   { label: 'Mock AI Interview Agent', to: '/mock-interview', desc: 'Interactive voice & text interview simulation', icon: Bot },
-  { label: 'My Profile', to: '/profile', desc: 'Skills, bio, projects & experience', icon: User },
-  { label: 'Wishlist', to: '/wishlist', desc: 'Saved reports & resumes collection', icon: Bookmark },
   { label: 'Interview Report Generator', to: '/interview-report', desc: 'Generate custom Q&A and prep plan', icon: FileText },
   { label: 'Plan Tracker', to: '/plan-tracker', desc: 'Track your preparation roadmaps & tasks', icon: Compass },
   { label: 'Resume Creator', to: '/resume-creator', desc: 'Build ATS resumes with live preview', icon: FilePlus },
   { label: 'ATS Calculator', to: '/ats-calculator', desc: 'Analyze resume match percentage with AI', icon: BarChart2 },
   { label: 'ATS Enhancer', to: '/ats-enhancer', desc: 'Optimize & enhance resume with AI', icon: Wand2 },
+  { label: 'My Profile', to: '/profile', desc: 'Skills, bio, projects & experience', icon: User },
+  { label: 'Wishlist', to: '/wishlist', desc: 'Saved reports & resumes collection', icon: Bookmark },
 ]
 
 const TopBar = () => {
@@ -503,11 +503,11 @@ const TopBar = () => {
                               return isNaN(d.getTime())
                                 ? 'Recent'
                                 : d.toLocaleDateString([], {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })
                             })()}
                           </span>
                         </div>

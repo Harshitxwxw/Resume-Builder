@@ -2219,9 +2219,103 @@
         }
       }
 
+      .section-empty-hint {
+        background: rgba(255, 255, 255, 0.02) !important;
+        border: 1px dashed var(--border-card) !important;
+
+        p {
+          color: var(--text-muted) !important;
+        }
+
+        .btn-empty-action {
+          color: #60a5fa !important;
+
+          &:hover {
+            color: #93c5fd !important;
+          }
+        }
+      }
+
       .asset-card {
         background: var(--bg-card) !important;
         border: 1px solid var(--border-card) !important;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
+
+        &:hover {
+          background: var(--bg-card-elevated) !important;
+          border-color: var(--border-focus) !important;
+          box-shadow: 0 8px 24px -2px rgba(0, 0, 0, 0.5), 0 0 16px rgba(59, 130, 246, 0.15) !important;
+        }
+
+        .asset-title {
+          color: var(--text-primary) !important;
+          font-weight: 700 !important;
+        }
+
+        .asset-score-pill {
+          background: var(--accent-blue-bg) !important;
+          color: var(--accent-blue) !important;
+          border: 1px solid rgba(59, 130, 246, 0.3) !important;
+          font-weight: 700 !important;
+
+          &.mint-pill {
+            background: var(--accent-emerald-bg) !important;
+            color: var(--accent-emerald) !important;
+            border-color: rgba(16, 185, 129, 0.3) !important;
+          }
+        }
+
+        .layout-badge {
+          background: var(--accent-indigo-bg) !important;
+          color: #a5b4fc !important;
+          border: 1px solid rgba(99, 102, 241, 0.3) !important;
+        }
+
+        .asset-card__meta-line {
+          color: var(--text-muted) !important;
+
+          .meta-item {
+            color: var(--text-muted) !important;
+
+            &.bold-text {
+              color: var(--text-secondary) !important;
+            }
+          }
+
+          .meta-sep {
+            color: var(--border-card) !important;
+          }
+        }
+
+        .asset-card__footer {
+          border-top: 1px solid var(--border-subtle) !important;
+        }
+
+        .asset-card__footer-meta {
+          color: var(--text-light) !important;
+
+          .font-hint {
+            color: var(--text-muted) !important;
+          }
+
+          .meta-sep {
+            color: var(--border-card) !important;
+          }
+        }
+
+        .status-indicator-pill {
+          background: transparent !important;
+          border: none !important;
+          padding: 0 !important;
+
+          &.tracked {
+            color: #34d399 !important;
+          }
+
+          &.available {
+            color: var(--text-muted) !important;
+          }
+        }
 
         .btn-card-action {
           background: #192438 !important;
@@ -2233,16 +2327,46 @@
             color: #ffffff !important;
             border-color: #3b82f6 !important;
           }
+
+          &.primary {
+            background: #2563eb !important;
+            color: #ffffff !important;
+            border-color: #3b82f6 !important;
+
+            &:hover {
+              background: #1d4ed8 !important;
+              border-color: #1d4ed8 !important;
+            }
+          }
+
+          &.mint {
+            background: rgba(16, 185, 129, 0.12) !important;
+            color: #34d399 !important;
+            border-color: rgba(16, 185, 129, 0.35) !important;
+
+            &:hover {
+              background: #10b981 !important;
+              color: #ffffff !important;
+              border-color: #10b981 !important;
+            }
+          }
         }
 
         .wishlist-toggle-btn {
           background: var(--bg-card-elevated) !important;
           border: 1px solid var(--border-card) !important;
+          color: #60a5fa !important;
 
           &.active {
-            background: rgba(239, 68, 68, 0.15) !important;
-            border-color: rgba(239, 68, 68, 0.3) !important;
-            color: #ef4444 !important;
+            background: rgba(37, 99, 235, 0.16) !important;
+            border-color: rgba(59, 130, 246, 0.35) !important;
+            color: #60a5fa !important;
+
+            &:hover {
+              background: rgba(239, 68, 68, 0.16) !important;
+              border-color: rgba(239, 68, 68, 0.35) !important;
+              color: #f87171 !important;
+            }
           }
         }
       }

@@ -299,301 +299,316 @@ const Wishlist = () => {
         </div>
       ) : (
         <div className="wishlist-sections-container">
-          {/* Section 1: Saved Interview Reports */}
-          {(isSearching
-            ? (activeTab === 'all' || activeTab === 'reports') && filteredReports.length > 0
-            : (activeTab === 'all' || activeTab === 'reports')
-          ) && (
-            <section className="wishlist-section">
-              <div className="section-title-bar">
-                <div className="section-title-left">
-                  <div className="dot blue" />
-                  <h2>Wishlisted Interview Reports</h2>
-                  <span className="badge">{filteredReports.length}</span>
-                </div>
-              </div>
+          {(() => {
+            const categoryDefs = [
+              {
+                id: 'reports',
+                title: 'Wishlisted Interview Reports',
+                dotClass: 'blue',
+                items: filteredReports,
+                totalCount: reports.length,
+                emptyMsg: isSearching
+                  ? `No interview reports match "${searchQuery}".`
+                  : 'No interview reports saved to wishlist yet. Bookmark tailored interview reports from the dashboard or report generator to see them here.',
+                ctaText: 'Generate Report',
+                ctaLink: '/interview-report',
+                renderCard: (report) => {
+                  const reportId = report._id || report.id
+                  const isTracked = report.isTracked || isPlanTracked(reportId)
+                  const techCount = report.technicalQuestions?.length || 0
+                  const behCount = report.behavioralQuestions?.length || 0
+                  const daysCount = report.preparationPlan?.length || 0
 
-              {filteredReports.length === 0 ? (
-                <div className="section-empty-hint">
-                  <p>No interview reports match your filter in the wishlist.</p>
-                </div>
-              ) : (
-                <div className="cards-grid">
-                  {filteredReports.map((report) => {
-                    const reportId = report._id || report.id
-                    const isTracked = report.isTracked || isPlanTracked(reportId)
-                    const techCount = report.technicalQuestions?.length || 0
-                    const behCount = report.behavioralQuestions?.length || 0
-                    const daysCount = report.preparationPlan?.length || 0
+                  const isMock = reportId?.startsWith('mock-')
+                  const viewUrl = isMock ? `/mock-interview?reportId=${reportId}` : `/interview/${reportId}`
 
-                    const isMock = reportId?.startsWith('mock-')
-                    const viewUrl = isMock ? `/mock-interview?reportId=${reportId}` : `/interview/${reportId}`
-
-                    return (
-                      <div
-                        className="asset-card report-asset-card compact"
-                        key={reportId}
-                        onClick={() => navigate(viewUrl)}
-                        title="Click to view detailed report"
-                      >
-                        <div className="asset-card__main-info">
-                          <div className="asset-card__icon-box blue">
-                            <FileText size={20} />
-                          </div>
-                          <div className="asset-card__title-meta">
-                            <div className="asset-card__title-row">
-                              <h3 className="asset-title" title={report.title}>
-                                {report.title || 'Technical Interview Report'}
-                              </h3>
-                              <span className="asset-score-pill">
-                                {report.matchscore ?? report.matchScore ?? 85}% Fit
-                              </span>
-                            </div>
-                            <div className="asset-card__meta-line">
-                              <span className="meta-item">
-                                <Calendar size={13} />
-                                {formatDate(report.createdAt)}
-                              </span>
-                              <span className="meta-sep">·</span>
-                              <span className="meta-item">{daysCount}d Roadmap</span>
-                              <span className="meta-sep">·</span>
-                              <span className="meta-item">{techCount + behCount} Questions</span>
-                            </div>
-                          </div>
+                  return (
+                    <div
+                      className="asset-card report-asset-card compact"
+                      key={reportId}
+                      onClick={() => navigate(viewUrl)}
+                      title="Click to view detailed report"
+                    >
+                      <div className="asset-card__main-info">
+                        <div className="asset-card__icon-box blue">
+                          <FileText size={20} />
                         </div>
-
-                        <div className="asset-card__footer">
-                          {isTracked ? (
-                            <span className="status-indicator-pill tracked">
-                              <CheckCircle2 size={14} />
-                              <span>Plan Tracked</span>
+                        <div className="asset-card__title-meta">
+                          <div className="asset-card__title-row">
+                            <h3 className="asset-title" title={report.title}>
+                              {report.title || 'Technical Interview Report'}
+                            </h3>
+                            <span className="asset-score-pill">
+                              {report.matchscore ?? report.matchScore ?? 85}% Fit
                             </span>
-                          ) : (
-                            <span className="status-indicator-pill available">
-                              <Compass size={14} />
-                              <span>Untracked</span>
+                          </div>
+                          <div className="asset-card__meta-line">
+                            <span className="meta-item">
+                              <Calendar size={13} />
+                              {formatDate(report.createdAt)}
                             </span>
-                          )}
-
-                          <div className="footer-actions-wrap">
-                            <button
-                              type="button"
-                              className="wishlist-toggle-btn active"
-                              title="Remove from wishlist"
-                              onClick={(e) => handleRemoveReport(reportId, report.title, e)}
-                            >
-                              <Bookmark size={15} fill="#2563eb" />
-                            </button>
-
-                            <button
-                              type="button"
-                              className="btn-card-action"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                navigate(viewUrl)
-                              }}
-                            >
-                              <span>View Report</span>
-                              <ArrowRight size={14} />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-            </section>
-          )}
-
-          {/* Section 2: Saved Resumes */}
-          {(isSearching
-            ? (activeTab === 'all' || activeTab === 'resumes') && filteredResumes.length > 0
-            : (activeTab === 'all' || activeTab === 'resumes')
-          ) && (
-            <section className="wishlist-section">
-              <div className="section-title-bar">
-                <div className="section-title-left">
-                  <div className="dot navy" />
-                  <h2>Wishlisted Resumes</h2>
-                  <span className="badge">{filteredResumes.length}</span>
-                </div>
-              </div>
-
-              {filteredResumes.length === 0 ? (
-                <div className="section-empty-hint">
-                  <p>No resumes match your filter in the wishlist.</p>
-                </div>
-              ) : (
-                <div className="cards-grid">
-                  {filteredResumes.map((resume) => {
-                    const personal = resume.data?.personal || {}
-                    const expCount = resume.data?.experience?.length || 0
-                    const eduCount = resume.data?.education?.length || 0
-
-                    return (
-                      <div
-                        className="asset-card resume-asset-card compact"
-                        key={resume.id}
-                        onClick={() => handleEditResume(resume)}
-                        title="Click to edit resume"
-                      >
-                        <div className="asset-card__main-info">
-                          <div className="asset-card__icon-box navy">
-                            <FilePlus size={20} />
-                          </div>
-                          <div className="asset-card__title-meta">
-                            <div className="asset-card__title-row">
-                              <h3 className="asset-title" title={resume.title}>
-                                {resume.title || personal.fullName || 'ATS Resume'}
-                              </h3>
-                              <span className="layout-badge">
-                                {resume.layout ? `${resume.layout.replace('-', ' ')}` : 'Single Col'}
-                              </span>
-                            </div>
-                            <div className="asset-card__meta-line">
-                              <span className="meta-item bold-text">
-                                {personal.profession || 'Software Professional'}
-                              </span>
-                              <span className="meta-sep">·</span>
-                              <span className="meta-item">{expCount} Roles</span>
-                              <span className="meta-sep">·</span>
-                              <span className="meta-item">{eduCount} Degrees</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="asset-card__footer">
-                          <span className="asset-card__footer-meta">
-                            <Calendar size={13} />
-                            <span>{formatDate(resume.updatedAt)}</span>
                             <span className="meta-sep">·</span>
-                            <span className="font-hint">Font: {resume.font || 'Inter'}</span>
-                          </span>
-
-                          <div className="footer-actions-wrap">
-                            <button
-                              type="button"
-                              className="wishlist-toggle-btn active"
-                              title="Remove from wishlist"
-                              onClick={(e) => handleRemoveResume(resume.id, resume.title, e)}
-                            >
-                              <Bookmark size={15} fill="#2563eb" />
-                            </button>
-
-                            <button
-                              type="button"
-                              className="btn-card-action primary"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleEditResume(resume)
-                              }}
-                            >
-                              <Edit3 size={14} />
-                              <span>Edit</span>
-                            </button>
+                            <span className="meta-item">{daysCount}d Roadmap</span>
+                            <span className="meta-sep">·</span>
+                            <span className="meta-item">{techCount + behCount} Questions</span>
                           </div>
                         </div>
                       </div>
-                    )
-                  })}
-                </div>
-              )}
-            </section>
-          )}
 
-          {/* Section 3: Wishlisted Mock AI Interviews */}
-          {(isSearching
-            ? (activeTab === 'all' || activeTab === 'mock') && filteredMockReports.length > 0
-            : (activeTab === 'all' || activeTab === 'mock')
-          ) && (
-            <section className="wishlist-section">
-              <div className="section-title-bar">
-                <div className="section-title-left">
-                  <div className="dot mint" style={{ backgroundColor: '#10b981' }} />
-                  <h2>Wishlisted Mock Interviews</h2>
-                  <span className="badge">{filteredMockReports.length}</span>
-                </div>
-              </div>
-
-              {filteredMockReports.length === 0 ? (
-                <div className="section-empty-hint">
-                  <p>No mock interview reports match your filter in the wishlist.</p>
-                </div>
-              ) : (
-                <div className="cards-grid">
-                  {filteredMockReports.map((mock) => {
-                    const score = Number(mock.overallScore || 0).toFixed(1)
-                    return (
-                      <div
-                        className="asset-card mock-asset-card"
-                        key={mock.id}
-                        onClick={() => navigate('/mock-interview')}
-                        title="Click to view mock interview"
-                      >
-                        <div className="asset-card__main-info">
-                          <div className="asset-card__icon-box mint" style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
-                            <Bot size={22} />
-                          </div>
-                          <div className="asset-card__title-meta">
-                            <div className="asset-card__title-row">
-                              <h3 className="asset-title" title={mock.role}>
-                                {mock.role || 'Interview Practice'}
-                              </h3>
-                              <span className="match-pill green" style={{ color: '#10b981', background: 'rgba(16, 185, 129, 0.14)' }}>
-                                {score}/10 Score
-                              </span>
-                            </div>
-                            <div className="asset-card__meta-line">
-                              <span className="meta-item">
-                                <Calendar size={13} />
-                                {formatDate(mock.createdAt)}
-                              </span>
-                              <span className="meta-sep">·</span>
-                              <span className="meta-item">{mock.level || 'Intermediate'}</span>
-                              <span className="meta-sep">·</span>
-                              <span className="meta-item">{mock.qaCount || 5} Questions</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="asset-card__footer">
-                          <span className="status-indicator-pill tracked" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: '#10b981', fontSize: '12px', fontWeight: 600 }}>
+                      <div className="asset-card__footer">
+                        {isTracked ? (
+                          <span className="status-indicator-pill tracked">
                             <CheckCircle2 size={14} />
-                            <span>Completed Session</span>
+                            <span>Plan Tracked</span>
                           </span>
+                        ) : (
+                          <span className="status-indicator-pill available">
+                            <Compass size={14} />
+                            <span>Untracked</span>
+                          </span>
+                        )}
 
-                          <div className="footer-actions-wrap">
-                            <button
-                              type="button"
-                              className="wishlist-toggle-btn active"
-                              title="Remove from wishlist"
-                              onClick={(e) => handleRemoveMockReport(mock.id, mock.role, e)}
-                            >
-                              <Bookmark size={15} fill="#2563eb" />
-                            </button>
+                        <div className="footer-actions-wrap">
+                          <button
+                            type="button"
+                            className="wishlist-toggle-btn active"
+                            title="Remove from wishlist"
+                            onClick={(e) => handleRemoveReport(reportId, report.title, e)}
+                          >
+                            <Bookmark size={15} fill="currentColor" />
+                          </button>
 
-                            <button
-                              type="button"
-                              className="btn-card-action mint"
-                              style={{ color: '#10b981', borderColor: 'rgba(16, 185, 129, 0.3)' }}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                navigate('/mock-interview')
-                              }}
-                            >
-                              <span>View Session</span>
-                              <ArrowRight size={13} />
-                            </button>
+                          <button
+                            type="button"
+                            className="btn-card-action"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              navigate(viewUrl)
+                            }}
+                          >
+                            <span>View Report</span>
+                            <ArrowRight size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                }
+              },
+              {
+                id: 'resumes',
+                title: 'Wishlisted Resumes',
+                dotClass: 'navy',
+                items: filteredResumes,
+                totalCount: resumes.length,
+                emptyMsg: isSearching
+                  ? `No resumes match "${searchQuery}".`
+                  : 'No resumes saved to wishlist yet. Bookmark created ATS resumes from the dashboard to quickly access them here.',
+                ctaText: 'Create ATS Resume',
+                ctaLink: '/resume-creator',
+                renderCard: (resume) => {
+                  const personal = resume.data?.personal || {}
+                  const expCount = resume.data?.experience?.length || 0
+                  const eduCount = resume.data?.education?.length || 0
+
+                  return (
+                    <div
+                      className="asset-card resume-asset-card compact"
+                      key={resume.id}
+                      onClick={() => handleEditResume(resume)}
+                      title="Click to edit resume"
+                    >
+                      <div className="asset-card__main-info">
+                        <div className="asset-card__icon-box navy">
+                          <FilePlus size={20} />
+                        </div>
+                        <div className="asset-card__title-meta">
+                          <div className="asset-card__title-row">
+                            <h3 className="asset-title" title={resume.title}>
+                              {resume.title || personal.fullName || 'ATS Resume'}
+                            </h3>
+                            <span className="layout-badge">
+                              {resume.layout ? `${resume.layout.replace('-', ' ')}` : 'Single Col'}
+                            </span>
+                          </div>
+                          <div className="asset-card__meta-line">
+                            <span className="meta-item bold-text">
+                              {personal.profession || 'Software Professional'}
+                            </span>
+                            <span className="meta-sep">·</span>
+                            <span className="meta-item">{expCount} Roles</span>
+                            <span className="meta-sep">·</span>
+                            <span className="meta-item">{eduCount} Degrees</span>
                           </div>
                         </div>
                       </div>
-                    )
-                  })}
+
+                      <div className="asset-card__footer">
+                        <span className="asset-card__footer-meta">
+                          <Calendar size={13} />
+                          <span>{formatDate(resume.updatedAt)}</span>
+                          <span className="meta-sep">·</span>
+                          <span className="font-hint">Font: {resume.font || 'Inter'}</span>
+                        </span>
+
+                        <div className="footer-actions-wrap">
+                          <button
+                            type="button"
+                            className="wishlist-toggle-btn active"
+                            title="Remove from wishlist"
+                            onClick={(e) => handleRemoveResume(resume.id, resume.title, e)}
+                          >
+                            <Bookmark size={15} fill="currentColor" />
+                          </button>
+
+                          <button
+                            type="button"
+                            className="btn-card-action primary"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleEditResume(resume)
+                            }}
+                          >
+                            <Edit3 size={14} />
+                            <span>Edit</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                }
+              },
+              {
+                id: 'mock',
+                title: 'Wishlisted Mock Interviews',
+                dotClass: 'mint',
+                dotStyle: { backgroundColor: '#10b981' },
+                items: filteredMockReports,
+                totalCount: mockReports.length,
+                emptyMsg: isSearching
+                  ? `No mock AI interviews match "${searchQuery}".`
+                  : 'No mock AI interviews saved to wishlist yet. Complete and bookmark mock interview sessions to access them here.',
+                ctaText: 'Start Mock Interview',
+                ctaLink: '/mock-interview',
+                renderCard: (mock) => {
+                  const score = Number(mock.overallScore || 0).toFixed(1)
+                  return (
+                    <div
+                      className="asset-card mock-asset-card compact"
+                      key={mock.id}
+                      onClick={() => navigate('/mock-interview')}
+                      title="Click to view mock interview"
+                    >
+                      <div className="asset-card__main-info">
+                        <div className="asset-card__icon-box mint" style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
+                          <Bot size={20} />
+                        </div>
+                        <div className="asset-card__title-meta">
+                          <div className="asset-card__title-row">
+                            <h3 className="asset-title" title={mock.role}>
+                              {mock.role || 'Interview Practice'}
+                            </h3>
+                            <span className="asset-score-pill mint-pill">
+                              {score}/10 Score
+                            </span>
+                          </div>
+                          <div className="asset-card__meta-line">
+                            <span className="meta-item">
+                              <Calendar size={13} />
+                              {formatDate(mock.createdAt)}
+                            </span>
+                            <span className="meta-sep">·</span>
+                            <span className="meta-item">{mock.level || 'Intermediate'}</span>
+                            <span className="meta-sep">·</span>
+                            <span className="meta-item">{mock.qaCount || 5} Questions</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="asset-card__footer">
+                        <span className="status-indicator-pill tracked">
+                          <CheckCircle2 size={14} />
+                          <span>Completed Session</span>
+                        </span>
+
+                        <div className="footer-actions-wrap">
+                          <button
+                            type="button"
+                            className="wishlist-toggle-btn active"
+                            title="Remove from wishlist"
+                            onClick={(e) => handleRemoveMockReport(mock.id, mock.role, e)}
+                          >
+                            <Bookmark size={15} fill="currentColor" />
+                          </button>
+
+                          <button
+                            type="button"
+                            className="btn-card-action mint"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              navigate('/mock-interview')
+                            }}
+                          >
+                            <span>View Session</span>
+                            <ArrowRight size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                }
+              }
+            ]
+
+            // Filter by active tab if not "all"
+            let categoriesToRender = categoryDefs
+            if (activeTab !== 'all') {
+              categoriesToRender = categoriesToRender.filter((cat) => cat.id === activeTab)
+            } else if (isSearching) {
+              // When searching, show categories that have matches
+              categoriesToRender = categoriesToRender.filter((cat) => cat.items.length > 0)
+            }
+
+            // CRITICAL: Sort categories so categories WITH items appear first,
+            // and any category with 0 items is pushed to the bottom!
+            const sortedCategories = [...categoriesToRender].sort((a, b) => {
+              const aHas = a.items.length > 0 ? 1 : 0
+              const bHas = b.items.length > 0 ? 1 : 0
+              return bHas - aHas
+            })
+
+            return sortedCategories.map((cat) => (
+              <section className="wishlist-section" key={cat.id}>
+                <div className="section-title-bar">
+                  <div className="section-title-left">
+                    <div className={`dot ${cat.dotClass}`} style={cat.dotStyle} />
+                    <h2>{cat.title}</h2>
+                    <span className="badge">{cat.items.length}</span>
+                  </div>
                 </div>
-              )}
-            </section>
-          )}
+
+                {cat.items.length === 0 ? (
+                  <div className="section-empty-hint">
+                    <p>{cat.emptyMsg}</p>
+                    {!isSearching && (
+                      <button
+                        type="button"
+                        className="btn-empty-action"
+                        onClick={() => navigate(cat.ctaLink)}
+                      >
+                        <span>{cat.ctaText}</span>
+                        <ArrowRight size={13} />
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="cards-grid">
+                    {cat.items.map((item) => cat.renderCard(item))}
+                  </div>
+                )}
+              </section>
+            ))
+          })()}
         </div>
       )}
     </main>
