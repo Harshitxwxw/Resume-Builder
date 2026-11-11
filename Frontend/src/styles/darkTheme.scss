@@ -8,14 +8,14 @@
 [data-theme="dark"],
 .dark-theme,
 .theme-dark {
-  // Soothing, eye-friendly palette (eliminates eye-strain / harsh pitch-black glare)
-  --bg-canvas: #0b0f19;
+  // Refined, eye-friendly SaaS dark palette with clear depth hierarchy
+  --bg-canvas: #040711;
   --bg-card: #131b2c;
   --bg-card-elevated: #182236;
   --bg-card-active: #1d2a42;
   --bg-input: #0f1726;
 
-  --border-subtle: #1a2336;
+  --border-subtle: #1c273c;
   --border-card: #202d44;
   --border-card-hover: #2d3e5e;
   --border-focus: #3b82f6;
@@ -47,7 +47,7 @@
   }
   &::-webkit-scrollbar-track,
   *::-webkit-scrollbar-track {
-    background: #0b0f19;
+    background: #040711;
   }
   &::-webkit-scrollbar-thumb,
   *::-webkit-scrollbar-thumb {
@@ -71,7 +71,7 @@
   // 2. TOPBAR HEADER & NAVIGATION
   // ============================================================================
   .topbar {
-    background-color: #0e1422 !important;
+    background-color: #080d1a !important;
     border-bottom: 1px solid var(--border-subtle) !important;
 
     // Current page pill badge
@@ -367,8 +367,9 @@
   // 3. SIDEBAR NAVIGATION
   // ============================================================================
   .sidebar {
-    background-color: #090e17 !important;
+    background-color: #0c1322 !important;
     border-right: 1px solid var(--border-subtle) !important;
+    box-shadow: 4px 0 24px -4px rgba(0, 0, 0, 0.45) !important;
 
     .sidebar__brand {
       border-bottom-color: var(--border-subtle) !important;
