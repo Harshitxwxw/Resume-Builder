@@ -65,7 +65,6 @@ const Login = () => {
       <div className="auth-top-nav">
         <Link to="/" className="back-home-link">
           <ArrowLeft size={16} />
-          <span>Back to Home</span>
         </Link>
       </div>
 
@@ -102,7 +101,7 @@ const Login = () => {
                 type="email"
                 id="email"
                 name="email"
-                placeholder="name@example.com"
+                placeholder="Enter Your Email"
                 value={email}
                 required
                 autoComplete="email"
@@ -164,7 +163,7 @@ const Login = () => {
         <div className="auth-card-footer">
           <span>Don't have an account?</span>
           <Link to="/register" className="switch-link">
-            Sign up free
+            Sign up
           </Link>
         </div>
 
